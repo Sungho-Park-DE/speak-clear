@@ -1,0 +1,11 @@
+node_modules/
+test-results/
+playwright-report/
+__pycache__/
+.pytest_cache/
+.DS_Store
+.claude/settings.local.json
+
+# 목소리 녹음은 개인 데이터라 커밋하지 않는다 (분석 결과 JSON은 analysis/results에 남긴다)
+recordings/*
+!recordings/.gitkeep

@@ -1,0 +1,13 @@
+{
+  "name": "voice-practice",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "playwright test && npm run test:analysis",
+    "test:page": "playwright test",
+    "test:analysis": "uv run --with pytest --with praat-parselmouth --with numpy --with av pytest -q analysis"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.64.1"
+  }
+}
