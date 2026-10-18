@@ -9,3 +9,9 @@ __pycache__/
 # 목소리 녹음은 개인 데이터라 커밋하지 않는다 (분석 결과 JSON은 analysis/results에 남긴다)
 recordings/*
 !recordings/.gitkeep
+
+# TCR은 git add -A로 커밋하므로 빌드·환경 산출물도 제외
+.env
+.venv/
+dist/
+coverage/

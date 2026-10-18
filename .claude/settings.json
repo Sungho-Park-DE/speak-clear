@@ -1,0 +1,28 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "d=\"$CLAUDE_PROJECT_DIR\"; [ -f \"$d/.claude/hooks/boundary_check.py\" ] || d=\"$(git rev-parse --show-toplevel 2>/dev/null)\"; [ -f \"$d/.claude/hooks/boundary_check.py\" ] || exit 0; python3 \"$d/.claude/hooks/boundary_check.py\" --hook",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "d=\"$CLAUDE_PROJECT_DIR\"; [ -f \"$d/.claude/hooks/tcr.py\" ] || d=\"$(git rev-parse --show-toplevel 2>/dev/null)\"; [ -f \"$d/.claude/hooks/tcr.py\" ] || exit 0; python3 \"$d/.claude/hooks/tcr.py\"",
+            "timeout": 900,
+            "statusMessage": "TCR: running tests..."
+          }
+        ]
+      }
+    ]
+  }
+}

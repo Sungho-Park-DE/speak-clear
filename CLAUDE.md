@@ -84,3 +84,10 @@ uv run analysis/analyze_voice.py --segments recordings/all_in_one.m4a   # 한 �
 ```
 
 해석 원칙: 진단이 아니다. CPPS·HNR은 설정·장비·코덱에 따라 값이 달라지므로 같은 조건끼리 시간에 따라 비교한다. 어떤 톤이 "좋은 목소리"인지는 취향이라 데이터로 정하지 않는다. 데이터로 말할 수 있는 건 구조적으로 덜 무리하는 방향뿐이다.
+
+## Development methods
+
+- **Architecture**: concept design + Let It Slop. Each folder in `analysis/modules` is one independent, replaceable module. Modules never import each other; they meet only in `analysis/syncs`. Detailed rules load from `.claude/rules/let-it-slop.md` when you work on module files, and a PostToolUse hook checks imports after every edit.
+- **Designing** a new feature, service or data model: use the `concept-design` skill before writing code.
+- **Changing** a module materially: write a new version with the `slop-module` skill instead of refactoring the old one.
+- **TCR**: when the current branch starts with `tcr/`, a Stop hook runs `npx playwright test --max-failures=1 --reporter=dot && uv run --with pytest --with praat-parselmouth --with numpy --with av pytest -q -x analysis` at the end of every turn. Green is committed automatically and red is reverted automatically. Before editing on such a branch, read the "Working rules" section of `.claude/skills/tcr/SKILL.md`.

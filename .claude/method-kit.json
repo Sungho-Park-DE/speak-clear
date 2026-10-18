@@ -1,0 +1,28 @@
+{
+  "boundaries": {
+    "modules_root": "analysis/modules",
+    "public_entries": [
+      "__init__.py",
+      "index.ts",
+      "index.tsx",
+      "index.js",
+      "index.jsx",
+      "index.mjs"
+    ],
+    "source_roots": [
+      ".",
+      "analysis"
+    ],
+    "path_aliases": {},
+    "exempt_paths": [],
+    "allow_cross_module_public_imports": false
+  },
+  "tcr": {
+    "test_cmd": "npx playwright test --max-failures=1 --reporter=dot && uv run --with pytest --with praat-parselmouth --with numpy --with av pytest -q -x analysis",
+    "branch_prefix": "tcr/",
+    "timeout_sec": 75,
+    "max_consecutive_reverts": 3,
+    "commit_no_verify": true,
+    "output_tail_chars": 3000
+  }
+}
