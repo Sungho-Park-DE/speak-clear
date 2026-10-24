@@ -15,3 +15,6 @@ recordings/*
 .venv/
 dist/
 coverage/
+
+# 개인 장비·배포 메모
+CLAUDE.local.md
