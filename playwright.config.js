@@ -1,14 +1,14 @@
 import { defineConfig } from '@playwright/test';
 
-// 마이크는 tests/helpers.js가 페이지 안에서 220 Hz 신호로 바꿔 끼운다.
-// (설치된 Chrome에 진짜 getUserMedia를 쓰면 macOS 마이크 권한 단계에서 멈춘다)
+// tests/helpers.js swaps the mic for a 220 Hz signal inside the page.
+// (Real getUserMedia in installed Chrome stops at the macOS microphone permission prompt.)
 export default defineConfig({
   testDir: 'tests',
   timeout: 30_000,
   reporter: 'list',
   use: {
     baseURL: 'http://127.0.0.1:8791',
-    channel: process.env.PW_CHANNEL || 'chrome',   // 설치된 Chrome 사용. 번들 Chromium은 PW_CHANNEL=chromium
+    channel: process.env.PW_CHANNEL || 'chrome',   // installed Chrome; bundled Chromium with PW_CHANNEL=chromium
     launchOptions: { args: ['--autoplay-policy=no-user-gesture-required'] },
   },
   webServer: {

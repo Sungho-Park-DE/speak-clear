@@ -3,14 +3,14 @@
 # requires-python = ">=3.10"
 # dependencies = ["praat-parselmouth>=0.4.3", "numpy", "av"]
 # ///
-"""목소리 분석 (Praat / parselmouth).
+"""Voice analysis (Praat / parselmouth).
 
     uv run analysis/analyze_voice.py --speech en_free.m4a ko_free.m4a --vowel a.m4a --glide glide.m4a
-    uv run analysis/analyze_voice.py --segments all_in_one.m4a     # 한 파일 녹음에서 구간 찾기
+    uv run analysis/analyze_voice.py --segments all_in_one.m4a     # find segments in a single-file recording
 
-FILE@START-END(초)로 일부 구간만 분석한다. 예: all_in_one.m4a@12.5-70
-wav/aiff/flac/mp3는 Praat가 바로 읽고, m4a/mp4/webm(페이지 녹음)은 PyAV로 디코딩한다.
-진단용이 아니라 같은 장비·설정에서 시간에 따른 변화를 비교하는 용도다.
+Use FILE@START-END (seconds) to analyze only part of a file, e.g. all_in_one.m4a@12.5-70
+Praat reads wav/aiff/flac/mp3 directly; m4a/mp4/webm (page recordings) are decoded with PyAV.
+Not a diagnostic tool: use it to compare changes over time with the same equipment and settings.
 """
 import argparse
 import json
@@ -33,7 +33,7 @@ def note(hz):
 
 
 def semi(hz):
-    """100 Hz 기준 반음."""
+    """Semitones relative to 100 Hz."""
     return 12 * np.log2(np.asarray(hz, dtype=float) / 100.0)
 
 
@@ -42,14 +42,14 @@ def med(values):
     return float(np.median(v)) if v else None
 
 
-# ---------- 읽기 ----------
+# ---------- Loading ----------
 def load(spec):
     path, rng = spec, None
     m = re.fullmatch(r'(.+)@([\d.]+)-([\d.]+)', spec)
     if m:
         path, rng = m.group(1), (float(m.group(2)), float(m.group(3)))
     if not Path(path).is_file():
-        sys.exit(f'파일이 없어요: {path}')
+        sys.exit(f'File not found: {path}')
     try:
         snd = parselmouth.Sound(path)
     except parselmouth.PraatError:
@@ -74,14 +74,14 @@ def decode(path):
     return parselmouth.Sound(np.concatenate(chunks).astype(np.float64), sampling_frequency=sr)
 
 
-# ---------- 측정 ----------
+# ---------- Measurements ----------
 def pitch_of(snd, lo, hi):
     p = snd.to_pitch_ac(time_step=0.01, pitch_floor=lo, pitch_ceiling=hi)
     return p, p.selected_array['frequency']
 
 
 def pitch_adaptive(snd):
-    """F0 범위 2단계 추정: 50–800 Hz로 한 번 잰 뒤 0.75·Q1 ~ 1.5·Q3로 다시 잰다 (옥타브 오류 줄이기)."""
+    """Two-pass F0 range: measure once at 50–800 Hz, then again at 0.75·Q1 to 1.5·Q3 (reduces octave errors)."""
     _, f = pitch_of(snd, 50, 800)
     v = f[f > 0]
     lo, hi = (max(40.0, 0.75 * np.percentile(v, 25)), 1.5 * np.percentile(v, 75)) if len(v) >= 20 else (60.0, 500.0)
@@ -90,7 +90,7 @@ def pitch_adaptive(snd):
 
 
 def sounding(snd, min_pause=0.25, silence_db=-25.0):
-    """세기로 찾은 발성 구간 [(시작, 끝)]. 상위 1% 세기보다 25 dB 넘게 작으면 조용함, 그게 min_pause 이상이면 쉼."""
+    """Sounding segments [(start, end)] found by intensity. More than 25 dB below the top-1% intensity is silence; silence of min_pause or longer is a pause."""
     it = snd.to_intensity(minimum_pitch=50, time_step=0.01)
     t, db = it.xs(), it.values[0]
     thr = max(np.percentile(db, 99) + silence_db, db.min())
@@ -107,8 +107,8 @@ def sounding(snd, min_pause=0.25, silence_db=-25.0):
 
 
 def syllables(t, db, thr, pitch, min_dip=2.0):
-    """음절핵 수 (De Jong & Wempe 2009 방식 간소화): 임계 위 세기 봉우리 가운데
-    다음 봉우리까지 2 dB 넘게 꺼지고, 그 지점이 유성인 것."""
+    """Number of syllable nuclei (simplified De Jong & Wempe 2009): intensity peaks above the threshold
+    that dip by more than 2 dB before the next peak and are voiced."""
     pk = np.flatnonzero((db[1:-1] > db[:-2]) & (db[1:-1] >= db[2:])) + 1
     pk = pk[db[pk] > thr]
     n = 0
@@ -120,7 +120,7 @@ def syllables(t, db, thr, pitch, min_dip=2.0):
 
 
 def formants(snd, pitch, ceiling):
-    """유성 프레임의 F1–F3 중앙값 (Burg)."""
+    """Median F1–F3 over voiced frames (Burg)."""
     fm = snd.to_formant_burg(time_step=0.01, max_number_of_formants=5, maximum_formant=ceiling,
                              window_length=0.025, pre_emphasis_from=50)
     f0 = pitch.selected_array['frequency']
@@ -132,7 +132,7 @@ def formants(snd, pitch, ceiling):
 
 
 def cpps(snd):
-    """CPPS (dB), AVQI 설정 (Maryn & Weenink 2015)."""
+    """CPPS (dB), AVQI settings (Maryn & Weenink 2015)."""
     pc = call(snd, 'To PowerCepstrogram', 60, 0.002, 5000, 50)
     return call(pc, 'Get CPPS', 'no', 0.01, 0.001, 60, 330, 0.05, 'Parabolic', 0.001, 0, 'Straight', 'Robust')
 
@@ -143,8 +143,8 @@ def hnr(snd):
 
 
 def h1h2(snd, pitch):
-    """보정하지 않은 H1–H2 (dB). 프레임마다 4주기 Hann 창 스펙트럼에서 f0와 2·f0 근처 최댓값의 차이.
-    F1이 높은 /a/에서만 의미가 있다 (F1이 낮으면 H1이 부풀려짐)."""
+    """Uncorrected H1–H2 (dB): per frame, difference of the spectral maxima near f0 and 2·f0 in a 4-period Hann window.
+    Only meaningful for /a/ with a high F1 (a low F1 inflates H1)."""
     x, sr = snd.values[0], snd.sampling_frequency
     out = []
     for t, f in zip(pitch.xs(), pitch.selected_array['frequency']):
@@ -162,13 +162,13 @@ def h1h2(snd, pitch):
     return med(out)
 
 
-# ---------- 종류별 분석 ----------
+# ---------- Analysis by recording type ----------
 def speech(snd, ceiling=None):
     p, f, rng = pitch_adaptive(snd)
     v = f[f > 0]
     segs, (t, db, thr) = sounding(snd)
     if len(v) < 20 or not segs:
-        return {'error': '유성음을 거의 찾지 못했어요'}
+        return {'error': 'Hardly any voiced sound found'}
     sv = semi(v)
     span = segs[-1][1] - segs[0][0]
     phon = sum(e - s for s, e in segs)
@@ -195,7 +195,7 @@ def vowel(snd, ceiling=None):
     reps = [(s, e) for s, e in segs if e - s >= 1.0] or [(snd.xmin, snd.xmax)]
     rows = []
     for s, e in reps:
-        cut = 0.1 * (e - s)                       # 시작·끝 10%는 버리고 안정 구간만
+        cut = 0.1 * (e - s)                       # drop the first and last 10%, keep the stable part
         core = snd.extract_part(s + cut, e - cut)
         p, f, _ = pitch_adaptive(core)
         v = f[f > 0]
@@ -206,7 +206,7 @@ def vowel(snd, ceiling=None):
                      'hnr': hnr(core), 'cpps': cpps(core), 'h1h2': h1h2(core, p),
                      'F': formants(core, p, ceiling or (5000 if f0 < 165 else 5500))})
     if not rows:
-        return {'error': '1초 이상 길게 낸 모음을 찾지 못했어요'}
+        return {'error': 'No sustained vowel of 1 s or longer found'}
     col = lambda k: med([r[k] for r in rows])
     rnd = lambda x, d: None if x is None else round(x, d)
     f0 = col('f0')
@@ -219,11 +219,11 @@ def vowel(snd, ceiling=None):
 
 
 def glide(snd):
-    p, f = pitch_of(snd, 50, 1100)                # 가성까지 넓게
+    p, f = pitch_of(snd, 50, 1100)                # wide enough to include falsetto
     sv = semi(f[f > 0])
     if len(sv) < 20:
-        return {'error': '음높이를 찾지 못했어요'}
-    keep = [abs(sv[i] - np.median(sv[max(0, i - 2):i + 3])) < 3 for i in range(len(sv))]   # 튀는 값(옥타브 오류) 제거
+        return {'error': 'No pitch found'}
+    keep = [abs(sv[i] - np.median(sv[max(0, i - 2):i + 3])) < 3 for i in range(len(sv))]   # drop outliers (octave errors)
     sv = sv[keep]
     lo, hi = (100 * 2 ** (np.percentile(sv, q) / 12) for q in (1, 99))
     return {'lowest_hz': round(float(lo), 1), 'lowest_note': note(lo),
@@ -231,7 +231,7 @@ def glide(snd):
             'range_st': round(float(semi(hi) - semi(lo)), 1)}
 
 
-# ---------- 출력 ----------
+# ---------- Output ----------
 def fmt_f(F):
     return '/'.join(str(x) if x else '–' for x in F)
 
@@ -241,23 +241,23 @@ def show(kind, name, r):
         print(f'\n[{kind}] {name}: {r["error"]}')
         return
     if kind == 'speech':
-        print(f'\n[말하기] {name}  ({r["duration_s"]}초)')
-        print(f'  중심음      {r["f0_median_note"]} ({r["f0_median_hz"]} Hz), 5–95%: {r["f0_p5_hz"]}–{r["f0_p95_hz"]} Hz')
-        print(f'  억양 폭     {r["f0_range_st"]}반음 (5–95%), 표준편차 {r["f0_sd_st"]}반음')
-        print(f'  말 속도     {r["speech_rate"]} 음절/초 (쉼 포함), 조음 속도 {r["articulation_rate"]} 음절/초, 음절 약 {r["syllables"]}개')
-        print(f'  쉼          {r["pauses"]}회 (0.25초 이상), 합계 {r["pause_s"]}초')
-        print(f'  CPPS        {r["cpps_db"]} dB (유성 구간)')
-        print(f'  포먼트      F1/F2/F3 {fmt_f(r["formants_hz"])} Hz (유성 프레임 중앙값, 상한 {r["formant_ceiling"]} Hz)')
+        print(f'\n[Speech] {name}  ({r["duration_s"]} s)')
+        print(f'  Center pitch  {r["f0_median_note"]} ({r["f0_median_hz"]} Hz), 5–95%: {r["f0_p5_hz"]}–{r["f0_p95_hz"]} Hz')
+        print(f'  Pitch range   {r["f0_range_st"]} st (5–95%), SD {r["f0_sd_st"]} st')
+        print(f'  Speech rate   {r["speech_rate"]} syl/s (incl. pauses), articulation rate {r["articulation_rate"]} syl/s, about {r["syllables"]} syllables')
+        print(f'  Pauses        {r["pauses"]} (0.25 s or longer), total {r["pause_s"]} s')
+        print(f'  CPPS          {r["cpps_db"]} dB (voiced segments)')
+        print(f'  Formants      F1/F2/F3 {fmt_f(r["formants_hz"])} Hz (median of voiced frames, ceiling {r["formant_ceiling"]} Hz)')
     elif kind == 'vowel':
-        print(f'\n[모음] {name}  ({r["reps"]}회, 가장 긴 것 {r["longest_s"]}초)')
-        print(f'  음높이      {r["f0_median_note"]} ({r["f0_median_hz"]} Hz), 흔들림 {r["f0_sd_cents"]}센트 (표준편차)')
-        print(f'  HNR         {r["hnr_db"]} dB')
-        print(f'  CPPS        {r["cpps_db"]} dB')
-        print(f'  H1–H2       {r["h1h2_db"]} dB (보정 전)')
-        print(f'  포먼트      F1/F2/F3 {fmt_f(r["formants_hz"])} Hz')
+        print(f'\n[Vowel] {name}  ({r["reps"]} reps, longest {r["longest_s"]} s)')
+        print(f'  Pitch         {r["f0_median_note"]} ({r["f0_median_hz"]} Hz), wobble {r["f0_sd_cents"]} cents (SD)')
+        print(f'  HNR           {r["hnr_db"]} dB')
+        print(f'  CPPS          {r["cpps_db"]} dB')
+        print(f'  H1–H2         {r["h1h2_db"]} dB (uncorrected)')
+        print(f'  Formants      F1/F2/F3 {fmt_f(r["formants_hz"])} Hz')
     else:
-        print(f'\n[글라이드] {name}')
-        print(f'  음역        {r["lowest_note"]} ({r["lowest_hz"]} Hz) – {r["highest_note"]} ({r["highest_hz"]} Hz), {r["range_st"]}반음')
+        print(f'\n[Glide] {name}')
+        print(f'  Range         {r["lowest_note"]} ({r["lowest_hz"]} Hz) – {r["highest_note"]} ({r["highest_hz"]} Hz), {r["range_st"]} st')
 
 
 def compare(res):
@@ -266,23 +266,23 @@ def compare(res):
     out = {}
     if len(sp) >= 2:
         n0, r0 = sp[0]
-        print(f'\n[비교] {n0} 기준')
+        print(f'\n[Comparison] relative to {n0}')
         out['vs_first_speech'] = []
         for n, r in sp[1:]:
             d = {'file': n, 'f0_st': round(float(semi(r['f0_median_hz']) - semi(r0['f0_median_hz'])), 1),
                  'range_st': round(r['f0_range_st'] - r0['f0_range_st'], 1),
                  'speech_rate': round(r['speech_rate'] - r0['speech_rate'], 2)}
             out['vs_first_speech'].append(d)
-            print(f'  {n}: 중심음 {d["f0_st"]:+}반음, 억양 폭 {d["range_st"]:+}반음, 말 속도 {d["speech_rate"]:+} 음절/초')
+            print(f'  {n}: center pitch {d["f0_st"]:+} st, pitch range {d["range_st"]:+} st, speech rate {d["speech_rate"]:+} syl/s')
     if sp and gl:
         lo, hi = min(g['lowest_hz'] for g in gl), max(g['highest_hz'] for g in gl)
         span = float(semi(hi) - semi(lo))
-        print(f'\n[음역 안 위치] 전체 음역 {note(lo)}–{note(hi)} ({span:.1f}반음)')
+        print(f'\n[Position in range] full range {note(lo)}–{note(hi)} ({span:.1f} st)')
         out['range_position'] = {'lowest_hz': lo, 'highest_hz': hi, 'span_st': round(span, 1), 'speech': []}
         for n, r in sp:
             pos = (float(semi(r['f0_median_hz'])) - float(semi(lo))) / span * 100
             out['range_position']['speech'].append({'file': n, 'percent_from_bottom': round(pos)})
-            print(f'  {n}: 중심음 {r["f0_median_note"]}는 아래에서 {pos:.0f}% 지점')
+            print(f'  {n}: center pitch {r["f0_median_note"]} is {pos:.0f}% up from the bottom')
     return out
 
 
@@ -291,24 +291,24 @@ def list_segments(spec):
     segs, _ = sounding(snd, min_pause=0.6)
     p, f = pitch_of(snd, 50, 1100)
     ts = p.xs()
-    print(f'{name}  ({snd.duration:.1f}초, 발성 구간 {len(segs)}개)')
+    print(f'{name}  ({snd.duration:.1f} s, {len(segs)} sounding segments)')
     for s, e in segs:
         v = f[(ts >= s) & (ts <= e) & (f > 0)]
-        desc = '무성 또는 잡음'
+        desc = 'unvoiced or noise'
         if len(v) > 10:
             sv = semi(v)
-            desc = f'중심음 {note(np.median(v)):>4}  폭 {np.percentile(sv, 95) - np.percentile(sv, 5):4.1f}반음  유성 {len(v) * 0.01:4.1f}초'
-        print(f'  {s:7.2f}–{e:7.2f}초  ({e - s:5.1f}초)  {desc}')
+            desc = f'center {note(np.median(v)):>4}  range {np.percentile(sv, 95) - np.percentile(sv, 5):4.1f} st  voiced {len(v) * 0.01:4.1f} s'
+        print(f'  {s:7.2f}–{e:7.2f} s  ({e - s:5.1f} s)  {desc}')
 
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument('--speech', nargs='+', default=[], metavar='FILE', help='말하기 (낭독, 자유 발화)')
-    ap.add_argument('--vowel', nargs='+', default=[], metavar='FILE', help='길게 낸 "아—" (여러 번 이어서 녹음해도 됨)')
-    ap.add_argument('--glide', nargs='+', default=[], metavar='FILE', help='최저음에서 최고음까지 글라이드')
-    ap.add_argument('--segments', metavar='FILE', help='긴 녹음 하나에서 발성 구간 목록만 출력')
-    ap.add_argument('--formant-ceiling', type=float, help='포먼트 상한 Hz (기본: 중심음 165 Hz 미만이면 5000, 아니면 5500)')
-    ap.add_argument('--json', metavar='OUT', help='결과를 JSON으로 저장')
+    ap.add_argument('--speech', nargs='+', default=[], metavar='FILE', help='speech (reading aloud, free speech)')
+    ap.add_argument('--vowel', nargs='+', default=[], metavar='FILE', help='sustained "ah" (several reps in one recording is fine)')
+    ap.add_argument('--glide', nargs='+', default=[], metavar='FILE', help='glide from lowest to highest note')
+    ap.add_argument('--segments', metavar='FILE', help='only list sounding segments in one long recording')
+    ap.add_argument('--formant-ceiling', type=float, help='formant ceiling in Hz (default: 5000 if center pitch is below 165 Hz, else 5500)')
+    ap.add_argument('--json', metavar='OUT', help='save results as JSON')
     a = ap.parse_args()
     if a.segments:
         list_segments(a.segments)
@@ -324,13 +324,13 @@ def main():
         res.append((kind, name, r))
         show(kind, name, r)
     extra = compare(res)
-    print('\n참고: 진단이 아니에요. CPPS·HNR은 장비·설정·코덱에 따라 달라지니 같은 조건끼리 비교하세요.')
+    print('\nNote: this is not a diagnosis. CPPS and HNR depend on equipment, settings and codec, so compare only recordings made under the same conditions.')
     if a.json:
         out = {'created': datetime.now().isoformat(timespec='seconds'), 'praat': parselmouth.PRAAT_VERSION,
                'files': [{'kind': k, 'file': n, **r} for k, n, r in res], **extra}
         Path(a.json).parent.mkdir(parents=True, exist_ok=True)
         Path(a.json).write_text(json.dumps(out, ensure_ascii=False, indent=2), encoding='utf-8')
-        print(f'저장: {a.json}')
+        print(f'Saved: {a.json}')
 
 
 if __name__ == '__main__':

@@ -1,4 +1,4 @@
-"""analyze_voice.py 회귀 테스트: 정답을 아는 합성음으로 측정값을 확인한다.
+"""Regression tests for analyze_voice.py: check measurements on synthetic sounds with known answers.
 
     npm run test:analysis
 """
@@ -17,13 +17,13 @@ def snd(y, sr=SR):
 
 
 def harmonic(freq):
-    """프레임별 순간 주파수 배열 → 배음 10개짜리 신호."""
+    """Per-sample instantaneous frequency array -> signal with 10 harmonics."""
     ph = 2 * np.pi * np.cumsum(freq) / SR
     return sum(np.sin(k * ph) / k for k in range(1, 11))
 
 
 def vowel(f0=110.0, dur=4.0):
-    """흔들림 0.4%의 펄스열을 남성 /a/ 포먼트 5개로 거른 모음."""
+    """Pulse train with 0.4% jitter, filtered through 5 formants of a male /a/."""
     x = np.zeros(int(SR * dur))
     t = 0.0
     while t < dur:
@@ -45,7 +45,7 @@ def test_vowel_f0_and_formants():
 
 
 def test_glide_range():
-    # glide()는 옥타브 오류를 피하려고 위아래 1%를 잘라 낸다. 한 번 훑는 글라이드에선 양끝이 2–3% 안쪽으로 나온다.
+    # glide() trims the top and bottom 1% to avoid octave errors. On a single sweep the ends come out 2–3% inside.
     t = np.arange(int(SR * 5)) / SR
     r = vox.glide(snd(harmonic(80 * (600 / 80) ** (t / 5))))
     assert abs(r['lowest_hz'] - 80) / 80 < 0.05
@@ -54,7 +54,7 @@ def test_glide_range():
 
 
 def test_speech_pauses_and_syllables():
-    # 세기가 4 Hz로 출렁이는 150 Hz 소리(음절 비슷) 3초 + 쉼 0.6초 + 2초 → 쉼 1회, 음절 약 20개
+    # 150 Hz tone with 4 Hz intensity modulation (syllable-like): 3 s + 0.6 s pause + 2 s -> 1 pause, about 20 syllables
     def burst(sec):
         t = np.arange(int(SR * sec)) / SR
         return harmonic(np.full(t.shape, 150.0)) * (0.55 - 0.45 * np.cos(2 * np.pi * 4 * t))

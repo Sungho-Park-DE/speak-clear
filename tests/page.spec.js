@@ -4,8 +4,8 @@ import { openPage, micOn, record, idbIds, newestTake, seedTakes } from './helper
 
 const between = (x, lo, hi) => { expect(x).toBeGreaterThan(lo); expect(x).toBeLessThan(hi); };
 
-test.describe('녹음', () => {
-  test('기본은 AudioWorklet으로 24-bit WAV를 저장한다', async ({ page }) => {
+test.describe('Recording', () => {
+  test('saves 24-bit WAV through AudioWorklet by default', async ({ page }) => {
     await openPage(page, () => {
       window.__cap = { worklet: 0, script: 0 };
       const am = AudioWorklet.prototype.addModule;
@@ -26,7 +26,7 @@ test.describe('녹음', () => {
     expect(await page.evaluate(() => localStorage.getItem('vp-persist-asked'))).toBe('true');
   });
 
-  test('AudioWorklet이 막히면 ScriptProcessor로 WAV를 저장한다', async ({ page }) => {
+  test('falls back to ScriptProcessor for WAV when AudioWorklet is blocked', async ({ page }) => {
     await openPage(page, () => {
       window.__script = 0;
       const sp = AudioContext.prototype.createScriptProcessor;
@@ -41,10 +41,10 @@ test.describe('녹음', () => {
     expect(await page.evaluate(() => window.__script)).toBe(1);
   });
 
-  test('WAV를 끄면 압축(webm) 녹음으로 돌아간다', async ({ page }) => {
+  test('turning WAV off goes back to compressed (webm) recording', async ({ page }) => {
     await openPage(page);
     await page.locator('#wavRec').uncheck();
-    await expect(page.locator('#storeInfo')).toContainText('압축 녹음');
+    await expect(page.locator('#storeInfo')).toContainText('Compressed');
     await micOn(page);
     await record(page, 1500);
     const t = await newestTake(page);
@@ -52,7 +52,7 @@ test.describe('녹음', () => {
     between(t.hz, 210, 230);
   });
 
-  test('로컬에서는 저장 버튼이 일반 다운로드로 WAV를 내려 준다', async ({ page }) => {
+  test('locally, Save downloads the WAV as a normal download', async ({ page }) => {
     await openPage(page);
     await micOn(page);
     await record(page, 1000);
@@ -62,29 +62,29 @@ test.describe('녹음', () => {
     const buf = readFileSync(await dl.path());
     expect(buf.length).toBe(t.size);
     expect(buf.toString('ascii', 0, 4)).toBe('RIFF');
-    await expect(page.locator('#status')).toContainText('브라우저 다운로드로 저장했어요');
+    await expect(page.locator('#status')).toContainText('Saved via browser download');
   });
 });
 
-test.describe('저장 공간 관리', () => {
-  test('정리는 기간보다 오래된 녹음만 지우고 ★ 보관은 남긴다', async ({ page }) => {
+test.describe('Storage management', () => {
+  test('Clean up deletes only takes older than the age and keeps ★ takes', async ({ page }) => {
     await openPage(page);
     await seedTakes(page, [{ age: 40, keep: true }, { age: 40 }, { age: 40 }, { age: 10 }, { age: 10 }, ...Array(40).fill({ age: 0 })]);
     await page.reload();
-    await expect(page.locator('#storeInfo')).toContainText('녹음 45개');
+    await expect(page.locator('#storeInfo')).toContainText('45 takes');
     await expect(page.locator('#takeList .take')).toHaveCount(40);
-    await expect(page.locator('#moreTakes')).toHaveText('더 보기 (5개 남음)');
+    await expect(page.locator('#moreTakes')).toHaveText('Show more (5 left)');
 
     await page.locator('#cleanBtn').click();
-    await expect(page.locator('#cleanPanel')).toContainText('보관 1개');
-    await expect(page.locator('#cleanGo')).toContainText('지우기 (2개');   // 기본 30일
+    await expect(page.locator('#cleanPanel')).toContainText('kept 1');
+    await expect(page.locator('#cleanGo')).toContainText('Delete (2 takes');   // default 30 days
     await page.locator('#cleanAge').selectOption('7');
-    await expect(page.locator('#cleanGo')).toContainText('지우기 (4개');
+    await expect(page.locator('#cleanGo')).toContainText('Delete (4 takes');
 
     page.once('dialog', d => d.accept());
     await page.locator('#cleanGo').click();
-    await expect(page.locator('#status')).toHaveText('4개 녹음을 지웠어요 (0.4 MB).');
-    await expect(page.locator('#storeInfo')).toContainText('녹음 41개');
+    await expect(page.locator('#status')).toHaveText('Deleted 4 takes (0.4 MB).');
+    await expect(page.locator('#storeInfo')).toContainText('41 takes');
     const ids = await idbIds(page);
     expect(ids).toHaveLength(41);
     expect(ids).toContain('seed0');
@@ -96,7 +96,7 @@ test.describe('저장 공간 관리', () => {
     await expect(page.locator('[data-keep="seed0"]')).toHaveAttribute('aria-pressed', 'true');
   });
 
-  test('★ 보관은 새로고침 뒤에도 남는다', async ({ page }) => {
+  test('★ keep survives a reload', async ({ page }) => {
     await openPage(page);
     await seedTakes(page, [{ age: 0 }]);
     await page.reload();
@@ -108,17 +108,17 @@ test.describe('저장 공간 관리', () => {
     await expect(page.locator('[data-keep="seed0"]')).toHaveAttribute('aria-pressed', 'true');
   });
 
-  test('공간이 모자라면 경고하고 정리 창을 열며, 다음 녹음은 다시 저장한다', async ({ page }) => {
+  test('when storage is full, warns and opens Clean up, and the next take saves again', async ({ page }) => {
     await openPage(page);
     await micOn(page);
-    // 저장 직후 트랜잭션을 중단시키고 오류 이름을 QuotaExceededError로 바꿔 공간 부족을 흉내 낸다
+    // Fake a full disk: abort the transaction right after put and report the error as QuotaExceededError
     await page.evaluate(() => {
       window.__q = { put: IDBObjectStore.prototype.put, err: Object.getOwnPropertyDescriptor(IDBTransaction.prototype, 'error') };
       IDBObjectStore.prototype.put = function (...a) { const r = window.__q.put.apply(this, a); this.transaction.abort(); return r; };
       Object.defineProperty(IDBTransaction.prototype, 'error', { configurable: true, get() { return { name: 'QuotaExceededError' }; } });
     });
     await record(page, 800);
-    await expect(page.locator('#status')).toContainText('저장 공간이 부족해서');
+    await expect(page.locator('#status')).toContainText('Storage is full');
     await expect(page.locator('#cleanPanel')).toBeVisible();
     expect(await idbIds(page)).toHaveLength(0);
 
@@ -129,5 +129,24 @@ test.describe('저장 공간 관리', () => {
     await record(page, 800);
     await expect(page.locator('#status')).toHaveText('');
     expect(await idbIds(page)).toHaveLength(1);
+  });
+});
+
+test.describe('Language', () => {
+  test('the toggle switches the UI between Korean and English and is remembered', async ({ page }) => {
+    await openPage(page, null, 'ko');
+    await expect(page.locator('h1 [data-l]:visible')).toHaveText('목소리 연습실');
+    await expect(page.locator('#micBtn')).toHaveText('마이크 켜기');
+    await expect(page.locator('#langBtn')).toHaveText('English');
+    await page.locator('#langBtn').click();
+    await expect(page.locator('html')).toHaveAttribute('lang', 'en');
+    await expect(page.locator('h1 [data-l]:visible')).toHaveText('Voice Practice');
+    await expect(page.locator('#micBtn')).toHaveText('Turn mic on');
+    await expect(page.locator('#steps')).toContainText('Breath release');
+    await expect(page.locator('#panel h2')).not.toHaveText(/[가-힣]/);
+    await expect(page.locator('#storeInfo')).toContainText('takes');
+    await page.reload();
+    await expect(page.locator('h1 [data-l]:visible')).toHaveText('Voice Practice');
+    await expect(page.locator('#langBtn')).toHaveText('한국어');
   });
 });

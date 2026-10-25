@@ -6,15 +6,15 @@ __pycache__/
 .DS_Store
 .claude/settings.local.json
 
-# 목소리 녹음은 개인 데이터라 커밋하지 않는다 (분석 결과 JSON은 analysis/results에 남긴다)
+# Voice recordings are personal data and are not committed (analysis JSON stays in analysis/results)
 recordings/*
 !recordings/.gitkeep
 
-# TCR은 git add -A로 커밋하므로 빌드·환경 산출물도 제외
+# TCR commits with git add -A, so also exclude build and environment artifacts
 .env
 .venv/
 dist/
 coverage/
 
-# 개인 장비·배포 메모
+# Personal equipment and deployment notes
 CLAUDE.local.md

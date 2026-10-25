@@ -86,6 +86,7 @@ select{background:var(--surface2);border:1px solid var(--line);border-radius:8px
 .routine .en{display:block;font-size:.8rem;color:var(--muted);font-weight:400}
 .routine .dur{font-size:.82rem;color:var(--muted);font-variant-numeric:tabular-nums}
 .routine .later .nm{color:var(--muted)}
+html:not([lang="en"]) [data-l="en"],html[lang="en"] [data-l="ko"]{display:none !important}
 .total{font-size:.85rem;color:var(--muted);margin:10px 0 0 12px}
 
 .panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:20px 22px 18px}
@@ -209,21 +210,22 @@ th{font-weight:500;color:var(--muted);font-size:.85rem}
 <div class="wrap">
   <header class="top">
     <div>
-      <h1>목소리 연습실</h1>
-      <p class="sub">루틴을 따라 하고, 녹음하고, 음높이를 눈으로 확인하세요</p>
+      <h1><span data-l="ko">목소리 연습실</span><span data-l="en">Voice Practice</span></h1>
+      <p class="sub"><span data-l="ko">루틴을 따라 하고, 녹음하고, 음높이를 눈으로 확인하세요</span><span data-l="en">Follow the routine, record yourself, and see your pitch</span></p>
     </div>
     <div class="mic">
-      <div class="seg" role="radiogroup" aria-label="기준 음역">
-        <button role="radio" data-voice="low">남성 음역</button>
-        <button role="radio" data-voice="high">여성 음역</button>
+      <div class="seg" role="radiogroup" data-aria="기준 음역|Reference range">
+        <button role="radio" data-voice="low"><span data-l="ko">남성 음역</span><span data-l="en">Male range</span></button>
+        <button role="radio" data-voice="high"><span data-l="ko">여성 음역</span><span data-l="en">Female range</span></button>
       </div>
-      <select id="dev" aria-label="입력 장치" hidden></select>
-      <button id="micBtn" class="btn">마이크 켜기</button>
+      <select id="dev" data-aria="입력 장치|Input device" hidden></select>
+      <button id="micBtn" class="btn"></button>
+      <button id="langBtn" class="btn ghost"></button>
     </div>
   </header>
   <p id="status" class="status" aria-live="polite"></p>
 
-  <section class="stage" aria-label="실시간 음높이">
+  <section class="stage" data-aria="실시간 음높이|Live pitch">
     <canvas id="cv"></canvas>
     <div class="hud">
       <div class="note" id="hNote">–</div>
@@ -232,35 +234,40 @@ th{font-weight:500;color:var(--muted);font-size:.85rem}
       <div class="meter" aria-hidden="true"><i id="hMeter"></i></div>
       <div class="lvl" id="hLvl"></div>
     </div>
-    <div class="recflag" id="recFlag" hidden>녹음 중 <span id="recTime">0:00</span></div>
+    <div class="recflag" id="recFlag" hidden><span data-l="ko">녹음 중</span><span data-l="en">Recording</span> <span id="recTime">0:00</span></div>
   </section>
 
   <details class="setup">
-    <summary>시작 전 확인 (Mac + ATR2100x)</summary>
-    <ul>
+    <summary><span data-l="ko">시작 전 확인</span><span data-l="en">Before you start</span> (Mac + ATR2100x)</summary>
+    <ul data-l="ko">
       <li>헤드폰은 마이크 본체 단자에 꽂으세요. 내 목소리가 지연 없이 들리고, 기준음도 마이크에 새어 들어가지 않아요.</li>
       <li>Mac 입력 음량은 말할 때 오른쪽 위 막대가 절반 이상 차고 빨간색이 되지 않을 정도로 맞추세요.</li>
       <li>이 페이지는 노이즈 억제와 자동 음량을 끈 상태로 녹음해요.</li>
     </ul>
+    <ul data-l="en">
+      <li>Plug your headphones into the jack on the mic itself. You hear your own voice with no delay, and the reference tones don't leak into the mic.</li>
+      <li>Set the Mac input volume so the meter at the top right fills more than halfway when you speak, without turning red.</li>
+      <li>This page records with noise suppression and automatic gain turned off.</li>
+    </ul>
   </details>
 
   <div class="main">
-    <nav class="routine" aria-label="루틴">
+    <nav class="routine" data-aria="루틴|Routine">
       <ol id="steps"></ol>
       <p class="total" id="total"></p>
     </nav>
     <section class="panel" id="panel" aria-live="off"></section>
   </div>
 
-  <section class="takes" aria-label="녹음 목록">
+  <section class="takes" data-aria="녹음 목록|Recordings">
     <div class="sec-head">
-      <h2>녹음</h2>
+      <h2><span data-l="ko">녹음</span><span data-l="en">Recordings</span></h2>
       <div class="rec-opts">
-        <label class="tog"><input type="checkbox" id="wavRec"> 무손실 WAV로 녹음</label>
-        <label class="tog"><input type="checkbox" id="autoplay"> 멈추면 바로 듣기</label>
+        <label class="tog"><input type="checkbox" id="wavRec"> <span data-l="ko">무손실 WAV로 녹음</span><span data-l="en">Record lossless WAV</span></label>
+        <label class="tog"><input type="checkbox" id="autoplay"> <span data-l="ko">멈추면 바로 듣기</span><span data-l="en">Play back after stopping</span></label>
       </div>
     </div>
-    <div class="store-row"><span class="store-info" id="storeInfo"></span><button class="btn sm ghost" id="cleanBtn" aria-expanded="false" aria-controls="cleanPanel">정리</button></div>
+    <div class="store-row"><span class="store-info" id="storeInfo"></span><button class="btn sm ghost" id="cleanBtn" aria-expanded="false" aria-controls="cleanPanel"><span data-l="ko">정리</span><span data-l="en">Clean up</span></button></div>
     <div class="clean" id="cleanPanel" hidden></div>
     <div class="compare" id="compare" hidden>
       <div class="cmp-legend" id="cmpLegend"></div>
@@ -268,39 +275,39 @@ th{font-weight:500;color:var(--muted);font-size:.85rem}
     </div>
     <ul id="takeList"></ul>
     <button class="btn sm ghost more" id="moreTakes" hidden></button>
-    <p class="empty" id="takeEmpty">아직 녹음이 없어요. Space 키나 녹음 버튼으로 시작하세요.</p>
+    <p class="empty" id="takeEmpty"><span data-l="ko">아직 녹음이 없어요. Space 키나 녹음 버튼으로 시작하세요.</span><span data-l="en">No recordings yet. Press Space or the Record button to start.</span></p>
   </section>
 
-  <section class="log" aria-label="기록">
-    <div class="sec-head"><h2>기록</h2><span class="tog">날마다 가장 좋은 값만 남겨요</span></div>
+  <section class="log" data-aria="기록|History">
+    <div class="sec-head"><h2><span data-l="ko">기록</span><span data-l="en">History</span></h2><span class="tog"><span data-l="ko">날마다 가장 좋은 값만 남겨요</span><span data-l="en">Keeps only the best value for each day</span></span></div>
     <div class="tablewrap"><table id="logTable"></table></div>
-    <p class="empty" id="logEmpty">VFE 단계를 하면 여기에 쌓여요.</p>
+    <p class="empty" id="logEmpty"><span data-l="ko">VFE 단계를 하면 여기에 쌓여요.</span><span data-l="en">Results from the VFE steps show up here.</span></p>
   </section>
 
   <details class="refs">
-    <summary>이 루틴의 근거</summary>
+    <summary><span data-l="ko">이 루틴의 근거</span><span data-l="en">Evidence for this routine</span></summary>
     <ol>
-      <li>Stemple JC 외 (1994). Efficacy of vocal function exercises as a method of improving voice production. <i>J Voice</i> 8(3):271–278. <span class="k">VFE 4단계 루틴의 원전.</span></li>
-      <li>Angadi V, Croake D, Stemple J (2019). Effects of Vocal Function Exercises: A Systematic Review. <i>J Voice</i> 33(1). <span class="k">21편 분석. 정상 목소리, 직업적 음성 사용자 포함 모든 연구에서 긍정적 효과, 부작용 보고 없음.</span></li>
-      <li>Titze IR (2006). Voice training and therapy with a semi-occluded vocal tract: rationale and scientific underpinnings. <i>J Speech Lang Hear Res</i> 49(2):448–459. <span class="k">빨대, 립트릴, 허밍이 왜 성대 부담을 줄이는지에 대한 이론.</span></li>
-      <li>Pozzali I 외 (2024). Effectiveness of SOVTEs in Patients with Dysphonia: Systematic Review and Meta-Analysis. <i>J Voice</i> 38(1). <span class="k">환자 대상 근거의 질은 매우 낮음. 워밍업 용도로만 짧게 씀.</span></li>
-      <li>Roy N 외 (2003). Three treatments for teachers with voice disorders: a randomized clinical trial. <i>J Speech Lang Hear Res</i> 46(3):670–688. <span class="k">공명 치료는 효과, 호흡근 훈련은 유의한 개선 없음.</span></li>
-      <li>Yiu EM 외 (2017). A systematic review of resonant voice therapy. <i>Int J Speech Lang Pathol</i> 19(1):17–29. <span class="k">근거 수준 중간, 대규모 연구 부족.</span></li>
-      <li>Elliot N, Sundberg J, Gramming P (1995). What happens during vocal warm-up? <i>J Voice</i> 9(1):37–44. <span class="k">워밍업 효과는 사람마다 차이가 큼.</span></li>
-      <li>Gish A 외 (2012). Vocal warm-up practices and perceptions in vocalists. <i>J Voice</i> 26(1). <span class="k">가장 흔한 워밍업은 5–10분, 5음 스케일과 글리산도.</span></li>
-      <li>Picheny MA, Durlach NI, Braida LD (1985, 1986, 1989). Speaking clearly for the hard of hearing I–III. <i>J Speech Hear Res</i>. <span class="k">또렷한 말은 단어 사이 쉼, 늘어난 소리 길이, 덜 줄어든 모음, 끝 자음 발음이 특징. 속도만으로는 설명되지 않음.</span></li>
-      <li>Munro MJ, Derwing TM (1995). Foreign accent, comprehensibility, and intelligibility in the speech of second language learners. <i>Language Learning</i> 45(1):73–97. <span class="k">억양이 강해도 충분히 알아들을 수 있음. 억양과 이해도는 부분적으로 별개.</span></li>
-      <li>Derwing TM, Munro MJ, Wiebe G (1998). Evidence in favor of a broad framework for pronunciation instruction. <i>Language Learning</i> 48(3):393–410. <span class="k">운율(강세, 리듬, 억양) 중심 훈련이 즉흥 발화의 이해도를 높임.</span></li>
-      <li>Field J (2005). Intelligibility and the listener: The role of lexical stress. <i>TESOL Quarterly</i> 39(3). <span class="k">단어 강세가 틀리면 원어민과 비원어민 청자 모두 알아듣기 어려워짐.</span></li>
-      <li>Foote JA, McDonough K (2017). Using shadowing with mobile technology to improve L2 pronunciation. <i>Journal of Second Language Pronunciation</i> 3(1):34–56. <span class="k">16명이 8주간 주 4회 이상, 10분씩 쉐도잉하며 자기 녹음. 즉흥 발화의 이해도와 유창성은 좋아졌고 억양(accent)은 그대로. 소규모 연구.</span></li>
-      <li>Hardison DM (2004). Generalization of computer-assisted prosody training: Quantitative and qualitative findings. <i>Language Learning &amp; Technology</i> 8(1):34–52. <span class="k">음높이 곡선을 보여 주는 운율 훈련이 새 문장에도 일반화됨.</span></li>
-      <li>Hamada Y (2016). <i>Teaching EFL Learners Shadowing for Listening</i>. Routledge. <span class="k">쉐도잉의 듣기 효과에 대한 연구 정리.</span></li>
-      <li>Maas E 외 (2008). Principles of motor learning in treatment of motor speech disorders. <i>Am J Speech Lang Pathol</i> 17(3):277–298. 및 Austermann Hula SN 외 (2008). <i>J Speech Lang Hear Res</i> 51(5). <span class="k">매번 즉시 피드백보다 줄이거나 늦춘 피드백이 기억에 더 오래 남음 (말 영역의 근거는 아직 제한적).</span></li>
-      <li>Alves M 외 (2019). The Effect of Hydration on Voice Quality in Adults: A Systematic Review. <i>J Voice</i> 33(1). <span class="k">물 섭취는 도움, 카페인은 뚜렷한 악영향 없음.</span></li>
-      <li>Hunter EJ, Titze IR (2009). Quantifying vocal fatigue recovery. <i>Ann Otol Rhinol Laryngol</i> 118(6):449–460. <span class="k">많이 쓴 뒤 회복에는 시간이 걸림. 짧게 자주 연습.</span></li>
+      <li>Stemple JC et al. (1994). Efficacy of vocal function exercises as a method of improving voice production. <i>J Voice</i> 8(3):271–278. <span class="k" data-l="ko">VFE 4단계 루틴의 원전.</span><span class="k" data-l="en">The original source of the four-step VFE routine.</span></li>
+      <li>Angadi V, Croake D, Stemple J (2019). Effects of Vocal Function Exercises: A Systematic Review. <i>J Voice</i> 33(1). <span class="k" data-l="ko">21편 분석. 정상 목소리, 직업적 음성 사용자 포함 모든 연구에서 긍정적 효과, 부작용 보고 없음.</span><span class="k" data-l="en">21 studies. Positive effects in every study, including normal voices and professional voice users; no adverse effects reported.</span></li>
+      <li>Titze IR (2006). Voice training and therapy with a semi-occluded vocal tract: rationale and scientific underpinnings. <i>J Speech Lang Hear Res</i> 49(2):448–459. <span class="k" data-l="ko">빨대, 립트릴, 허밍이 왜 성대 부담을 줄이는지에 대한 이론.</span><span class="k" data-l="en">The theory of why straws, lip trills and humming reduce the load on the vocal folds.</span></li>
+      <li>Pozzali I et al. (2024). Effectiveness of SOVTEs in Patients with Dysphonia: Systematic Review and Meta-Analysis. <i>J Voice</i> 38(1). <span class="k" data-l="ko">환자 대상 근거의 질은 매우 낮음. 워밍업 용도로만 짧게 씀.</span><span class="k" data-l="en">Evidence quality in patients is very low. Used here only as a short warm-up.</span></li>
+      <li>Roy N et al. (2003). Three treatments for teachers with voice disorders: a randomized clinical trial. <i>J Speech Lang Hear Res</i> 46(3):670–688. <span class="k" data-l="ko">공명 치료는 효과, 호흡근 훈련은 유의한 개선 없음.</span><span class="k" data-l="en">Resonance therapy helped; respiratory muscle training gave no significant improvement.</span></li>
+      <li>Yiu EM et al. (2017). A systematic review of resonant voice therapy. <i>Int J Speech Lang Pathol</i> 19(1):17–29. <span class="k" data-l="ko">근거 수준 중간, 대규모 연구 부족.</span><span class="k" data-l="en">Moderate level of evidence; large studies are lacking.</span></li>
+      <li>Elliot N, Sundberg J, Gramming P (1995). What happens during vocal warm-up? <i>J Voice</i> 9(1):37–44. <span class="k" data-l="ko">워밍업 효과는 사람마다 차이가 큼.</span><span class="k" data-l="en">Warm-up effects vary a lot between people.</span></li>
+      <li>Gish A et al. (2012). Vocal warm-up practices and perceptions in vocalists. <i>J Voice</i> 26(1). <span class="k" data-l="ko">가장 흔한 워밍업은 5–10분, 5음 스케일과 글리산도.</span><span class="k" data-l="en">The most common warm-up is 5–10 minutes of five-note scales and glissandos.</span></li>
+      <li>Picheny MA, Durlach NI, Braida LD (1985, 1986, 1989). Speaking clearly for the hard of hearing I–III. <i>J Speech Hear Res</i>. <span class="k" data-l="ko">또렷한 말은 단어 사이 쉼, 늘어난 소리 길이, 덜 줄어든 모음, 끝 자음 발음이 특징. 속도만으로는 설명되지 않음.</span><span class="k" data-l="en">Clear speech has pauses between words, longer sounds, less reduced vowels and released final consonants. Speaking rate alone doesn't explain it.</span></li>
+      <li>Munro MJ, Derwing TM (1995). Foreign accent, comprehensibility, and intelligibility in the speech of second language learners. <i>Language Learning</i> 45(1):73–97. <span class="k" data-l="ko">억양이 강해도 충분히 알아들을 수 있음. 억양과 이해도는 부분적으로 별개.</span><span class="k" data-l="en">A strong accent can still be fully understandable. Accent and comprehensibility are partly independent.</span></li>
+      <li>Derwing TM, Munro MJ, Wiebe G (1998). Evidence in favor of a broad framework for pronunciation instruction. <i>Language Learning</i> 48(3):393–410. <span class="k" data-l="ko">운율(강세, 리듬, 억양) 중심 훈련이 즉흥 발화의 이해도를 높임.</span><span class="k" data-l="en">Prosody-focused training (stress, rhythm, intonation) improved the comprehensibility of spontaneous speech.</span></li>
+      <li>Field J (2005). Intelligibility and the listener: The role of lexical stress. <i>TESOL Quarterly</i> 39(3). <span class="k" data-l="ko">단어 강세가 틀리면 원어민과 비원어민 청자 모두 알아듣기 어려워짐.</span><span class="k" data-l="en">Misplaced word stress makes speech harder to understand for both native and non-native listeners.</span></li>
+      <li>Foote JA, McDonough K (2017). Using shadowing with mobile technology to improve L2 pronunciation. <i>Journal of Second Language Pronunciation</i> 3(1):34–56. <span class="k" data-l="ko">16명이 8주간 주 4회 이상, 10분씩 쉐도잉하며 자기 녹음. 즉흥 발화의 이해도와 유창성은 좋아졌고 억양(accent)은 그대로. 소규모 연구.</span><span class="k" data-l="en">16 learners shadowed for 10 minutes at least 4 times a week for 8 weeks, recording themselves. Comprehensibility and fluency of spontaneous speech improved; accent did not change. Small study.</span></li>
+      <li>Hardison DM (2004). Generalization of computer-assisted prosody training: Quantitative and qualitative findings. <i>Language Learning &amp; Technology</i> 8(1):34–52. <span class="k" data-l="ko">음높이 곡선을 보여 주는 운율 훈련이 새 문장에도 일반화됨.</span><span class="k" data-l="en">Prosody training with visual pitch curves generalized to new sentences.</span></li>
+      <li>Hamada Y (2016). <i>Teaching EFL Learners Shadowing for Listening</i>. Routledge. <span class="k" data-l="ko">쉐도잉의 듣기 효과에 대한 연구 정리.</span><span class="k" data-l="en">An overview of research on shadowing for listening.</span></li>
+      <li>Maas E et al. (2008). Principles of motor learning in treatment of motor speech disorders. <i>Am J Speech Lang Pathol</i> 17(3):277–298; Austermann Hula SN et al. (2008). <i>J Speech Lang Hear Res</i> 51(5). <span class="k" data-l="ko">매번 즉시 피드백보다 줄이거나 늦춘 피드백이 기억에 더 오래 남음 (말 영역의 근거는 아직 제한적).</span><span class="k" data-l="en">Reduced or delayed feedback is retained longer than immediate feedback after every attempt (evidence for speech is still limited).</span></li>
+      <li>Alves M et al. (2019). The Effect of Hydration on Voice Quality in Adults: A Systematic Review. <i>J Voice</i> 33(1). <span class="k" data-l="ko">물 섭취는 도움, 카페인은 뚜렷한 악영향 없음.</span><span class="k" data-l="en">Drinking water helps; caffeine shows no clear harm.</span></li>
+      <li>Hunter EJ, Titze IR (2009). Quantifying vocal fatigue recovery. <i>Ann Otol Rhinol Laryngol</i> 118(6):449–460. <span class="k" data-l="ko">많이 쓴 뒤 회복에는 시간이 걸림. 짧게 자주 연습.</span><span class="k" data-l="en">Recovery after heavy use takes time. Practise in short, frequent sessions.</span></li>
     </ol>
   </details>
-  <p class="foot">녹음과 기록은 이 브라우저에만 저장돼요. 파일로 남기려면 녹음 목록의 저장 버튼을 누르세요. 목이 아프거나 쉰 느낌이 들면 그날은 멈추세요.</p>
+  <p class="foot"><span data-l="ko">녹음과 기록은 이 브라우저에만 저장돼요. 파일로 남기려면 녹음 목록의 저장 버튼을 누르세요. 목이 아프거나 쉰 느낌이 들면 그날은 멈추세요.</span><span data-l="en">Recordings and history are stored only in this browser. To keep a file, press Save in the recording list. If your throat hurts or your voice feels hoarse, stop for the day.</span></p>
 </div>
 
 <script>
@@ -315,9 +322,11 @@ const pc = m => ((Math.round(m) % 12) + 12) % 12;
 const noteName = m => NOTE[pc(m)] + (Math.floor(Math.round(m) / 12) - 1);
 const pad = n => String(n).padStart(2, '0');
 const dayKey = (d = new Date()) => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
-const fmtSec = s => s.toFixed(1) + '초';
+const fmtSec = s => s.toFixed(1) + tl('초', ' s');
 const fmtClock = s => { s = Math.max(0, Math.round(s)); return Math.floor(s / 60) + ':' + pad(s % 60); };
 const fmtSize = b => b >= 1e9 ? (b / 1e9).toFixed(1) + ' GB' : (b >= 1e7 ? Math.round(b / 1e6) : (b / 1e6).toFixed(1)) + ' MB';
+const tl = (ko, en) => S.lang === 'en' ? en : ko;
+const lf = (o, k) => S.lang === 'en' && o[k + 'En'] != null ? o[k + 'En'] : o[k];
 const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 const store = {
@@ -333,49 +342,68 @@ const REF = {
 const STEPS = [
   { id: 'breath', n: '호흡 정리', en: 'Breath release', kind: 'breath', dur: 60,
     why: '호흡근만 따로 훈련하는 것은 목소리 개선 효과가 확인되지 않았어요. 긴장을 푸는 1분 준비로만 써요.', cite: 'Roy 외 2003',
-    how: ['어깨, 턱, 혀의 힘을 빼고 바르게 서기', '코로 편하게 들이마시고 "스—"로 고르게 내쉬기', '가슴이나 배를 억지로 부풀리지 않기'] },
+    how: ['어깨, 턱, 혀의 힘을 빼고 바르게 서기', '코로 편하게 들이마시고 "스—"로 고르게 내쉬기', '가슴이나 배를 억지로 부풀리지 않기'],
+    whyEn: "Training the breathing muscles on their own has not been shown to improve the voice. This is only a 1-minute warm-up to release tension.", citeEn: "Roy et al. 2003",
+    howEn: ["Stand tall with shoulders, jaw and tongue relaxed", "Breathe in easily through the nose and out evenly on \"sss\"", "Don't force your chest or belly to expand"] },
   { id: 'sovt', n: '반폐쇄 성도 워밍업', en: 'SOVT warm-up', kind: 'free', dur: 180,
     why: '입술이나 빨대로 입구를 좁히면 성대가 적은 힘으로 효율적으로 진동해요.', cite: 'Titze 2006',
-    how: ['빨대를 물고 "우—" 1분 (가는 빨대일수록 저항이 커요)', '립트릴 "브르르" 1분', '허밍 "음—" 1분, 입술과 코 주변이 울리는 느낌', '각각 편한 음에서 시작해 위아래로 천천히 미끄러지기'] },
+    how: ['빨대를 물고 "우—" 1분 (가는 빨대일수록 저항이 커요)', '립트릴 "브르르" 1분', '허밍 "음—" 1분, 입술과 코 주변이 울리는 느낌', '각각 편한 음에서 시작해 위아래로 천천히 미끄러지기'],
+    whyEn: "Narrowing the mouth with lips or a straw lets the vocal folds vibrate efficiently with less effort.", citeEn: "Titze 2006",
+    howEn: ["\"Oo\" through a straw for 1 minute (thinner straws give more resistance)", "Lip trill \"brrr\" for 1 minute", "Hum \"mmm\" for 1 minute, feeling the buzz around the lips and nose", "Start each on a comfortable note and glide slowly up and down"] },
   { id: 'vfe1', n: '"이" 길게 내기', en: 'VFE 1 Sustained /i/', kind: 'sustain',
     why: 'Vocal Function Exercises(VFE)는 정상 목소리와 직업적 음성 사용자에게도 효과가 보고된, 근거가 가장 탄탄한 루틴이에요. 하루 2회 권장.', cite: 'Angadi 외 2019',
-    how: ['기준음을 듣고 같은 음에서 "이—"', '입술은 앞으로 둥글게 내밀고, 아주 작고 부드럽게', '소리가 거칠어지기 직전까지 최대한 길게', '2회'] },
+    how: ['기준음을 듣고 같은 음에서 "이—"', '입술은 앞으로 둥글게 내밀고, 아주 작고 부드럽게', '소리가 거칠어지기 직전까지 최대한 길게', '2회'],
+    whyEn: "Vocal Function Exercises (VFE) are the best-supported routine here, with benefits reported even for normal voices and professional voice users. Twice a day is recommended.", citeEn: "Angadi et al. 2019",
+    howEn: ["Listen to the reference tone and sing \"ee\" on the same note", "Lips rounded forward, very soft and quiet", "Hold it as long as you can, until just before the sound gets rough", "2 times"] },
   { id: 'vfe2', n: '아래에서 위로', en: 'VFE 2 Glide up', kind: 'glide',
     why: '성대를 늘이는 스트레칭 단계예요.', cite: 'Stemple 외 1994',
-    how: ['"놀(knoll)"의 "오" 입모양으로', '가장 낮은 음에서 가장 높은 음까지 끊지 않고 천천히', '목소리가 뒤집혀 가성으로 넘어가도 괜찮아요', '2회'] },
+    how: ['"놀(knoll)"의 "오" 입모양으로', '가장 낮은 음에서 가장 높은 음까지 끊지 않고 천천히', '목소리가 뒤집혀 가성으로 넘어가도 괜찮아요', '2회'],
+    whyEn: "The stretching step for the vocal folds.", citeEn: "Stemple et al. 1994",
+    howEn: ["Use the \"o\" mouth shape of \"knoll\"", "Glide slowly and without a break from your lowest to your highest note", "It's fine if your voice flips into falsetto", "2 times"] },
   { id: 'vfe3', n: '위에서 아래로', en: 'VFE 3 Glide down', kind: 'glide',
     why: '성대를 수축시키는 단계예요.', cite: 'Stemple 외 1994',
-    how: ['같은 "오" 입모양으로', '가장 높은 음에서 가장 낮은 음까지 천천히', '2회'] },
+    how: ['같은 "오" 입모양으로', '가장 높은 음에서 가장 낮은 음까지 천천히', '2회'],
+    whyEn: "The contracting step for the vocal folds.", citeEn: "Stemple et al. 1994",
+    howEn: ["Same \"o\" mouth shape", "Glide slowly from your highest to your lowest note", "2 times"] },
   { id: 'vfe4', n: '다섯 음 길게 내기', en: 'VFE 4 Sustained notes', kind: 'notes',
     why: '근력과 조절을 기르는 단계예요.', cite: 'Stemple 외 1994',
-    how: ['음을 고르면 기준음이 나와요', '"올(old)"을 "드" 없이 "오—"로, 최대한 길게', '작고 편하게, 음마다 2회'] },
+    how: ['음을 고르면 기준음이 나와요', '"올(old)"을 "드" 없이 "오—"로, 최대한 길게', '작고 편하게, 음마다 2회'],
+    whyEn: "Builds strength and control.", citeEn: "Stemple et al. 1994",
+    howEn: ["Pick a note to hear its reference tone", "Sing \"old\" without the \"d\", as \"ooo\", as long as you can", "Soft and easy, 2 times per note"] },
   { id: 'speak', n: '영어 낭독', en: 'English reading aloud', kind: 'speak', dur: 300,
     why: '영어를 알아듣기 쉬운 정도(comprehensibility)는 개별 발음보다 강세, 리듬, 억양 같은 운율(prosody)을 연습할 때 더 많이 좋아졌어요. 목표는 억양 없애기가 아니라 잘 알아듣게 하기예요.', cite: 'Derwing 외 1998',
-    how: ['초점을 하나만 고르고 읽기', '3번 녹음한 뒤 몰아서 듣기 (매번 바로 듣는 것보다 오래 남아요)', '면접 답변이나 발표 원고는 직접 입력에 붙여넣기'] },
+    how: ['초점을 하나만 고르고 읽기', '3번 녹음한 뒤 몰아서 듣기 (매번 바로 듣는 것보다 오래 남아요)', '면접 답변이나 발표 원고는 직접 입력에 붙여넣기'],
+    whyEn: "Comprehensibility improved more when learners practised prosody (stress, rhythm, intonation) than individual sounds. The goal is to be easy to understand, not to lose your accent.", citeEn: "Derwing et al. 1998",
+    howEn: ["Pick one focus and read", "Record 3 times, then listen to them together (it sticks longer than listening after every take)", "Paste interview answers or talk scripts into Custom text"] },
   { id: 'shadow', n: '쉐도잉', en: 'Shadowing', kind: 'shadow', dur: 300,
     why: '원어민 음성을 듣고 바로 따라 하는 연습이에요. 8주 쉐도잉으로 즉흥 발화의 이해도와 유창성이 좋아졌고, 모델과 내 음높이 곡선을 눈으로 비교하는 훈련은 억양 학습에 도움이 됐어요.', cite: 'Foote & McDonough 2017, Hardison 2004',
-    how: ['처음엔 듣고 따라 하기, 익숙해지면 겹쳐 말하기', '속도는 80–90%에서 시작해 100%로', '개별 소리보다 강세와 억양의 모양을 먼저 맞추기', '헤드폰 필수 (모델 소리가 녹음에 섞이지 않게)'] },
+    how: ['처음엔 듣고 따라 하기, 익숙해지면 겹쳐 말하기', '속도는 80–90%에서 시작해 100%로', '개별 소리보다 강세와 억양의 모양을 먼저 맞추기', '헤드폰 필수 (모델 소리가 녹음에 섞이지 않게)'],
+    whyEn: "Listen to a native speaker and repeat right away. Eight weeks of shadowing improved the comprehensibility and fluency of spontaneous speech, and comparing your pitch curve with the model's helped with intonation.", citeEn: "Foote & McDonough 2017, Hardison 2004",
+    howEn: ["Start by listening and repeating; once comfortable, speak along with the model", "Start at 80–90% speed and work up to 100%", "Match the shape of stress and intonation before individual sounds", "Headphones required, so the model doesn't leak into your recording"] },
   { id: 'sing', n: '5음 스케일', en: 'Five-note scale', kind: 'scale', later: true,
     why: '가수들이 가장 많이 쓰는 워밍업이에요. 말하기 루틴이 익숙해진 3–4주 뒤에 추가하세요.', cite: 'Gish 외 2012',
-    how: ['기준 스케일 듣기: 도레미파솔파미레도', '같은 모양으로 따라 부르며 선이 띠 안에 머무는지 보기', '편한 높이에서 시작해 반음씩 올리기'] }
+    how: ['기준 스케일 듣기: 도레미파솔파미레도', '같은 모양으로 따라 부르며 선이 띠 안에 머무는지 보기', '편한 높이에서 시작해 반음씩 올리기'],
+    whyEn: "The most common warm-up among singers. Add it after 3–4 weeks, once the speaking routine feels familiar.", citeEn: "Gish et al. 2012",
+    howEn: ["Listen to the reference scale: do re mi fa sol fa mi re do", "Sing the same shape and watch whether your line stays inside the bands", "Start at a comfortable pitch and go up a semitone at a time"] }
 ];
 const TEXTS = {
-  walk: { label: 'Morning walk (기본 리듬)', t: 'The morning was cool and clear, and the river moved slowly under the old stone bridge. A few people walked past with coffee in their hands, talking quietly. Somewhere a bicycle bell rang twice, and then the street was calm again. On days like this, there is no need to hurry.' },
-  update: { label: 'Work update (발표 톤)', t: 'Thanks for joining today. I would like to walk you through three things: what we tested, what we learned, and what we will do next. The first result surprised us. The data was clean, but the process around it was slow, and that is where most of the delay came from.' },
-  questions: { label: 'Questions (억양)', t: 'Have you ever tried to explain something simple and realized it was not simple at all? I have. Was the problem the idea, or the way I said it? Usually it was the way I said it. So now I slow down, I pause, and I ask: does this make sense?' },
-  sounds: { label: 'Tricky sounds (r/l, th, f/v, 끝소리)', t: 'Three friends rarely leave the village before eleven. They like to walk along the river, look for flat rocks, and throw them over the water. Last Thursday, though, it was very cold, so they stayed at a small cafe and talked about their travel plans.' },
-  custom: { label: '직접 입력 (원고 붙여넣기)', t: '' }
+  walk: { label: 'Morning walk (기본 리듬)', labelEn: "Morning walk (basic rhythm)", t: 'The morning was cool and clear, and the river moved slowly under the old stone bridge. A few people walked past with coffee in their hands, talking quietly. Somewhere a bicycle bell rang twice, and then the street was calm again. On days like this, there is no need to hurry.' },
+  update: { label: 'Work update (발표 톤)', labelEn: "Work update (presentation tone)", t: 'Thanks for joining today. I would like to walk you through three things: what we tested, what we learned, and what we will do next. The first result surprised us. The data was clean, but the process around it was slow, and that is where most of the delay came from.' },
+  questions: { label: 'Questions (억양)', labelEn: "Questions (intonation)", t: 'Have you ever tried to explain something simple and realized it was not simple at all? I have. Was the problem the idea, or the way I said it? Usually it was the way I said it. So now I slow down, I pause, and I ask: does this make sense?' },
+  sounds: { label: 'Tricky sounds (r/l, th, f/v, 끝소리)', labelEn: "Tricky sounds (r/l, th, f/v, final consonants)", t: 'Three friends rarely leave the village before eleven. They like to walk along the river, look for flat rocks, and throw them over the water. Last Thursday, though, it was very cold, so they stayed at a small cafe and talked about their travel plans.' },
+  custom: { label: '직접 입력 (원고 붙여넣기)', labelEn: "Custom text (paste a script)", t: '' }
 };
 const FOCUS = {
-  stress: { label: '강세', en: 'stress', tip: '강세 음절은 더 길고 크고 높게, 나머지는 가볍고 짧게. 예: PHOtograph, phoTOgraphy.' },
-  pause: { label: '의미 덩어리', en: 'thought groups', tip: '의미 덩어리마다 짧게 끊고, 덩어리 안에서는 단어를 이어 읽으세요. 쉼 횟수가 기록돼요.' },
-  intonation: { label: '억양', en: 'intonation', tip: '핵심 단어에서 음을 올리고, 평서문 끝은 내리세요. 억양 폭(반음)이 기록돼요.' },
-  ending: { label: '끝소리', en: 'final consonants', tip: 'desk, worked, friends처럼 끝 자음 뒤에 "으"를 붙이지 말고 짧게 닫으세요.' },
-  reach: { label: '전달', en: 'projection', tip: '방 반대편 벽에 소리를 닿게 한다는 느낌으로, 목에 힘은 빼고.' }
+  stress: { label: '강세', en: 'stress', tip: '강세 음절은 더 길고 크고 높게, 나머지는 가볍고 짧게. 예: PHOtograph, phoTOgraphy.', labelEn: "Stress", tipEn: "Make stressed syllables longer, louder and higher; keep the rest light and short. E.g. PHOtograph, phoTOgraphy." },
+  pause: { label: '의미 덩어리', en: 'thought groups', tip: '의미 덩어리마다 짧게 끊고, 덩어리 안에서는 단어를 이어 읽으세요. 쉼 횟수가 기록돼요.', labelEn: "Thought groups", tipEn: "Pause briefly between thought groups and link the words inside each group. The number of pauses is recorded." },
+  intonation: { label: '억양', en: 'intonation', tip: '핵심 단어에서 음을 올리고, 평서문 끝은 내리세요. 억양 폭(반음)이 기록돼요.', labelEn: "Intonation", tipEn: "Raise the pitch on key words and let statements fall at the end. Your pitch range (semitones) is recorded." },
+  ending: { label: '끝소리', en: 'final consonants', tip: 'desk, worked, friends처럼 끝 자음 뒤에 "으"를 붙이지 말고 짧게 닫으세요.', labelEn: "Final consonants", tipEn: "Close final consonants short and clean, as in desk, worked, friends, without adding a vowel after them." },
+  reach: { label: '전달', en: 'projection', tip: '방 반대편 벽에 소리를 닿게 한다는 느낌으로, 목에 힘은 빼고.', labelEn: "Projection", tipEn: "Imagine sending your voice to the far wall of the room, with your throat relaxed." }
 };
 
 /* ---------- state ---------- */
 const S = {
+  lang: store.get('vp-lang', /^ko\b/i.test(navigator.language || '') ? 'ko' : 'en'),
   voice: store.get('vp-voice', 'low'),
   step: Math.min(store.get('vp-step', 0), STEPS.length - 1),
   textLang: store.get('vp-text', 'walk'),
@@ -426,7 +454,7 @@ const DB = {
         const tx = this.db.transaction(name, mode), r = fn(tx.objectStore(name));
         r.onerror = () => { this.err = r.error && r.error.name; if (mode === 'readonly') res(null); };
         if (mode === 'readonly') r.onsuccess = () => res(r.result === undefined ? true : r.result);
-        else {   // 쓰기는 커밋까지 기다린다
+        else {   // writes wait until the transaction commits
           tx.oncomplete = () => res(true);
           tx.onabort = () => { this.err = (tx.error && tx.error.name) || this.err; res(null); };
         }
@@ -505,10 +533,10 @@ function stopStream() {
 }
 async function startMic(deviceId) {
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-    status('이 화면에서는 마이크를 쓸 수 없어요. Safari나 Chrome에서 HTML 파일을 직접 열어 주세요.', true); return;
+    status(tl('이 화면에서는 마이크를 쓸 수 없어요. Safari나 Chrome에서 HTML 파일을 직접 열어 주세요.', "The microphone isn't available here. Open the HTML file directly in Safari or Chrome."), true); return;
   }
   const ctx = ensureCtx();
-  if (!ctx) { status('이 브라우저는 Web Audio를 지원하지 않아요.', true); return; }
+  if (!ctx) { status(tl('이 브라우저는 Web Audio를 지원하지 않아요.', "This browser doesn't support Web Audio."), true); return; }
   stopStream();
   const audio = { echoCancellation: false, noiseSuppression: false, autoGainControl: false, channelCount: 1 };
   const id = deviceId || S.devId;
@@ -520,9 +548,9 @@ async function startMic(deviceId) {
       S.devId = ''; store.set('vp-dev', ''); return startMic();
     }
     const n = err && err.name;
-    if (n === 'NotAllowedError' || n === 'SecurityError') status('마이크 권한이 막혀 있어요. 브라우저에서 이 페이지의 마이크를 허용한 뒤 다시 켜세요. 계속 막히면 HTML 파일로 받아 브라우저에서 직접 여세요.', true);
-    else if (n === 'NotFoundError') status('연결된 마이크를 찾지 못했어요. USB 연결과 마이크 스위치를 확인하세요.', true);
-    else status('마이크를 열지 못했어요 (' + (n || '알 수 없는 오류') + ').', true);
+    if (n === 'NotAllowedError' || n === 'SecurityError') status(tl('마이크 권한이 막혀 있어요. 브라우저에서 이 페이지의 마이크를 허용한 뒤 다시 켜세요. 계속 막히면 HTML 파일로 받아 브라우저에서 직접 여세요.', "Microphone access is blocked. Allow the microphone for this page in your browser and turn it on again. If it stays blocked, download the HTML file and open it directly in the browser."), true);
+    else if (n === 'NotFoundError') status(tl('연결된 마이크를 찾지 못했어요. USB 연결과 마이크 스위치를 확인하세요.', "No microphone found. Check the USB connection and the mic's switch."), true);
+    else status(tl('마이크를 열지 못했어요 (', "Couldn't open the microphone (") + (n || tl('알 수 없는 오류', "unknown error")) + ').', true);
     updateMicUI(); return;
   }
   S.stream = stream;
@@ -532,13 +560,13 @@ async function startMic(deviceId) {
   S.src.connect(S.analyser); S.analyser.connect(S.sink);
   const src = S.src;
   S.cap = await capture(ctx);
-  if (S.src !== src) return;   // 기다리는 동안 다른 장치로 다시 연결됨
+  if (S.src !== src) return;   // reconnected to another device while waiting
   if (S.cap) src.connect(S.cap.node);
   S.td = new Float32Array(S.analyser.fftSize);
   S.yinBuf = new Float32Array(Math.floor(ctx.sampleRate / 60) + 4);
   S.live = true; S.floor = 0.003; S.raw = []; S.voicedDb = [];
   const tr = stream.getAudioTracks()[0];
-  status((tr && tr.label ? tr.label : '마이크') + ' 연결됨. 헤드폰은 마이크 단자에 꽂아 두세요.');
+  status((tr && tr.label ? tr.label : tl('마이크', "Microphone")) + tl(' 연결됨. 헤드폰은 마이크 단자에 꽂아 두세요.', " connected. Keep your headphones plugged into the mic's jack."));
   updateMicUI(); renderStore();
   await listDevices();
 }
@@ -554,14 +582,14 @@ async function listDevices() {
       if (atr && atr.deviceId !== curId && !S.devId) { S.devId = atr.deviceId; store.set('vp-dev', atr.deviceId); return startMic(atr.deviceId); }
     }
     sel.innerHTML = '';
-    devs.forEach(d => { const o = document.createElement('option'); o.value = d.deviceId; o.textContent = d.label || '마이크'; sel.appendChild(o); });
+    devs.forEach(d => { const o = document.createElement('option'); o.value = d.deviceId; o.textContent = d.label || tl('마이크', "Microphone"); sel.appendChild(o); });
     if (curId) sel.value = curId;
     sel.hidden = devs.length < 1;
   } catch (e) { sel.hidden = true; }
 }
 function updateMicUI() {
   const b = $('#micBtn');
-  b.textContent = S.live ? '마이크 끄기' : '마이크 켜기';
+  b.textContent = S.live ? tl('마이크 끄기', "Turn mic off") : tl('마이크 켜기', "Turn mic on");
   b.classList.toggle('on', S.live);
 }
 
@@ -685,13 +713,13 @@ function saveGlide() {
 function updateHud(now) {
   const { m, f, rms, peak } = S.cur;
   $('#hNote').textContent = S.live && m !== null ? noteName(m) : '–';
-  $('#hHz').textContent = S.live && m !== null ? Math.round(f) + ' Hz' : (S.live ? '' : '마이크 꺼짐');
+  $('#hHz').textContent = S.live && m !== null ? Math.round(f) + ' Hz' : (S.live ? '' : tl('마이크 꺼짐', "Mic off"));
   const ce = $('#hCents');
   if (S.live && m !== null && S.targets.length) {
     let best = S.targets[0];
     S.targets.forEach(t => { if (Math.abs(m - t.m) < Math.abs(m - best.m)) best = t; });
     const c = Math.round((m - best.m) * 100);
-    ce.textContent = best.label + ' 기준 ' + (c > 0 ? '+' : '') + c + '센트';
+    ce.textContent = best.label + tl(' 기준 ', ': ') + (c > 0 ? '+' : '') + c + tl('센트', ' cents');
     ce.className = 'cents ' + (Math.abs(c) <= 25 ? 'ok' : 'off');
   } else { ce.textContent = ''; ce.className = 'cents'; }
   const db = S.live ? 20 * Math.log10(Math.max(rms, 1e-6)) : -90;
@@ -700,10 +728,10 @@ function updateHud(now) {
   mi.classList.toggle('hot', S.live && peak > 0.97);
   let hint = '';
   if (S.live) {
-    if (peak > 0.97) hint = '너무 커요. Mac 입력 음량을 낮추세요.';
+    if (peak > 0.97) hint = tl('너무 커요. Mac 입력 음량을 낮추세요.', "Too loud. Lower the Mac input volume.");
     else if (S.voicedDb.length > 20) {
       const avg = S.voicedDb.reduce((a, b) => a + b.db, 0) / S.voicedDb.length;
-      hint = avg < -38 ? '입력이 작아요. 입력 음량을 올리거나 5–10cm까지 다가가세요.' : '입력 크기 좋아요';
+      hint = avg < -38 ? tl('입력이 작아요. 입력 음량을 올리거나 5–10cm까지 다가가세요.', "Input is quiet. Raise the input volume or move to 5–10 cm from the mic.") : tl('입력 크기 좋아요', "Input level is good");
     }
   }
   $('#hLvl').textContent = hint;
@@ -718,7 +746,7 @@ function updateHud(now) {
     if (lo) {
       lo.textContent = gl.lo === null ? '–' : noteName(gl.lo);
       hi.textContent = gl.hi === null ? '–' : noteName(gl.hi);
-      sp.textContent = gl.lo === null ? '–' : Math.round(gl.hi - gl.lo) + '반음';
+      sp.textContent = gl.lo === null ? '–' : Math.round(gl.hi - gl.lo) + tl('반음', " semitones");
     }
   }
   if (st.kind === 'scale') {
@@ -755,7 +783,7 @@ function draw(now) {
   });
   if (!S.live) {
     g.fillStyle = C.muted; g.textAlign = 'center'; g.font = '400 14px "IBM Plex Sans KR", system-ui, sans-serif';
-    g.fillText('마이크를 켜면 목소리의 높이가 여기에 선으로 그려져요', w / 2, h / 2);
+    g.fillText(tl('마이크를 켜면 목소리의 높이가 여기에 선으로 그려져요', "Turn on the mic and your pitch is drawn here as a line"), w / 2, h / 2);
     g.textAlign = 'left'; return;
   }
   const span = 8000, x0 = 34, xw = w - x0 - 170;
@@ -778,10 +806,12 @@ function draw(now) {
 new ResizeObserver(() => draw(performance.now())).observe(cv);
 
 /* ---------- routine UI ---------- */
+const stName = st => S.lang === 'en' ? st.en : st.n;
+function takeName(t) { const st = STEPS.find(x => x.id === t.step); return st ? stName(st) : t.stepName; }
 function stepDur(st) {
   if (st.dur) return fmtClock(st.dur);
-  if (st.kind === 'sustain' || st.kind === 'glide') return '약 1분';
-  if (st.kind === 'notes') return '약 3분';
+  if (st.kind === 'sustain' || st.kind === 'glide') return tl('약 1분', "~1 min");
+  if (st.kind === 'notes') return tl('약 3분', "~3 min");
   return '';
 }
 function renderSteps() {
@@ -790,11 +820,11 @@ function renderSteps() {
     const li = document.createElement('li'); if (st.later) li.className = 'later';
     li.innerHTML = `<button data-step="${i}" ${i === S.step ? 'aria-current="step"' : ''}>
       <span class="num">${i + 1}</span>
-      <span class="nm">${esc(st.n)}<span class="en">${esc(st.en)}${st.later ? ' (3–4주 뒤)' : ''}</span></span>
+      <span class="nm">${esc(stName(st))}<span class="en">${S.lang === 'en' ? '' : esc(st.en)}${st.later ? tl(' (3–4주 뒤)', ' (after 3–4 weeks)') : ''}</span></span>
       <span class="dur">${stepDur(st)}</span></button>`;
     ol.appendChild(li);
   });
-  $('#total').textContent = '1–8단계 약 20분. VFE(3–6단계)는 하루 2회.';
+  $('#total').textContent = tl('1–8단계 약 20분. VFE(3–6단계)는 하루 2회.', "Steps 1–8 take about 20 minutes. Do VFE (steps 3–6) twice a day.");
 }
 function setTargets() {
   const st = STEPS[S.step], R = REF[S.voice];
@@ -817,56 +847,56 @@ function goStep(i) {
 }
 function timerHTML() {
   return `<div class="timer"><b id="tmr">${fmtClock(S.timer.left)}</b>
-    <button class="btn" data-act="timer">${S.timer.running ? '일시정지' : '타이머 시작'}</button>
-    <button class="btn ghost" data-act="timer-reset">처음으로</button></div>`;
+    <button class="btn" data-act="timer">${S.timer.running ? tl('일시정지', "Pause") : tl('타이머 시작', "Start timer")}</button>
+    <button class="btn ghost" data-act="timer-reset">${tl('처음으로', 'Reset')}</button></div>`;
 }
 function renderPanel() {
   const st = STEPS[S.step], R = REF[S.voice];
   let body = '';
   if (st.kind === 'breath') {
-    body = `<div class="pacer${S.timer.running ? ' on' : ''}" id="pacer"><div class="ring"></div><span class="ph" id="phase">타이머를 시작하면 4초 들이마시고 6초 내쉬기를 안내해요</span></div>
+    body = `<div class="pacer${S.timer.running ? ' on' : ''}" id="pacer"><div class="ring"></div><span class="ph" id="phase">${tl('타이머를 시작하면 4초 들이마시고 6초 내쉬기를 안내해요', 'Start the timer for a guided 4-second inhale and 6-second exhale')}</span></div>
       <div class="controls">${timerHTML()}</div>`;
   } else if (st.kind === 'free') {
     body = `<div class="controls">${timerHTML()}</div>`;
   } else if (st.kind === 'sustain') {
-    body = `<div class="controls"><button class="btn" data-act="ref">기준음 듣기 ${noteName(R.f)}</button></div>
+    body = `<div class="controls"><button class="btn" data-act="ref">${tl('기준음 듣기', 'Play reference')} ${noteName(R.f)}</button></div>
       <div class="readouts" id="stepRO"></div>`;
   } else if (st.kind === 'glide') {
     body = `<div class="readouts">
-        <div class="ro"><b id="glLo">–</b><span>최저음</span></div>
-        <div class="ro"><b id="glHi">–</b><span>최고음</span></div>
-        <div class="ro"><b id="glSpan">–</b><span>음역 폭</span></div></div>
-      <div class="controls"><button class="btn ghost" data-act="glide-reset">다시 재기</button></div>`;
+        <div class="ro"><b id="glLo">–</b><span>${tl('최저음', 'Lowest')}</span></div>
+        <div class="ro"><b id="glHi">–</b><span>${tl('최고음', 'Highest')}</span></div>
+        <div class="ro"><b id="glSpan">–</b><span>${tl('음역 폭', 'Range')}</span></div></div>
+      <div class="controls"><button class="btn ghost" data-act="glide-reset">${tl('다시 재기', 'Measure again')}</button></div>`;
   } else if (st.kind === 'notes') {
     body = `<div class="controls notes" id="noteBtns"></div><div class="readouts" id="stepRO"></div>`;
   } else if (st.kind === 'speak') {
     if (!TEXTS[S.textLang]) S.textLang = 'walk';
-    const tabs = Object.entries(TEXTS).map(([k, v]) => `<option value="${k}" ${k === S.textLang ? 'selected' : ''}>${esc(v.label)}</option>`).join('');
-    const fx = Object.entries(FOCUS).map(([k, v]) => `<label><input type="radio" name="focus" value="${k}" ${k === S.focus ? 'checked' : ''}>${v.label} <span style="color:var(--muted)">${v.en}</span></label>`).join('');
-    body = `<div class="text-tabs"><select id="textSel" aria-label="읽을 글">${tabs}</select></div>
+    const tabs = Object.entries(TEXTS).map(([k, v]) => `<option value="${k}" ${k === S.textLang ? 'selected' : ''}>${esc(lf(v, 'label'))}</option>`).join('');
+    const fx = Object.entries(FOCUS).map(([k, v]) => `<label><input type="radio" name="focus" value="${k}" ${k === S.focus ? 'checked' : ''}>${lf(v, 'label')}${S.lang === 'en' ? '' : ` <span style="color:var(--muted)">${v.en}</span>`}</label>`).join('');
+    body = `<div class="text-tabs"><select id="textSel" aria-label="${tl('읽을 글', 'Text to read')}">${tabs}</select></div>
       ${S.textLang === 'custom'
-        ? `<textarea id="customText" class="read" lang="en" rows="6" placeholder="면접 답변이나 발표 원고를 붙여넣으세요">${esc(S.custom)}</textarea>`
+        ? `<textarea id="customText" class="read" lang="en" rows="6" placeholder="${tl('면접 답변이나 발표 원고를 붙여넣으세요', 'Paste an interview answer or a talk script')}">${esc(S.custom)}</textarea>`
         : `<p class="read" lang="en">${esc(TEXTS[S.textLang].t)}</p>`}
-      <div class="focus" role="radiogroup" aria-label="이번 초점">${fx}</div>
-      <p class="focus-tip" id="focusTip">${esc(FOCUS[S.focus].tip)}</p>
+      <div class="focus" role="radiogroup" aria-label="${tl('이번 초점', 'Focus')}">${fx}</div>
+      <p class="focus-tip" id="focusTip">${esc(lf(FOCUS[S.focus], 'tip'))}</p>
       <div class="controls">${timerHTML()}
-        <label class="tog"><input type="checkbox" data-act="blind" ${S.blind ? 'checked' : ''}> 3번 녹음 후 몰아서 듣기</label></div>`;
+        <label class="tog"><input type="checkbox" data-act="blind" ${S.blind ? 'checked' : ''}> ${tl('3번 녹음 후 몰아서 듣기', 'Listen after 3 takes')}</label></div>`;
   } else if (st.kind === 'shadow') {
     body = shPanelHTML();
   } else if (st.kind === 'scale') {
     const r = S.scaleRoot ?? R.root;
-    const opts = R.roots.map(m => `<option value="${m}" ${m === r ? 'selected' : ''}>${noteName(m)}에서 시작</option>`).join('');
-    body = `<div class="controls"><select id="rootSel" aria-label="시작음">${opts}</select>
-        <button class="btn" data-act="scale">스케일 듣기</button></div>
-      <div class="readouts"><div class="ro"><b id="bandNow">–</b><span>녹음 중 띠 안에 머문 비율</span></div></div>`;
+    const opts = R.roots.map(m => `<option value="${m}" ${m === r ? 'selected' : ''}>${tl(noteName(m) + '에서 시작', 'Start on ' + noteName(m))}</option>`).join('');
+    body = `<div class="controls"><select id="rootSel" aria-label="${tl('시작음', 'Starting note')}">${opts}</select>
+        <button class="btn" data-act="scale">${tl('스케일 듣기', 'Play scale')}</button></div>
+      <div class="readouts"><div class="ro"><b id="bandNow">–</b><span>${tl('녹음 중 띠 안에 머문 비율', 'Time inside the bands while recording')}</span></div></div>`;
   }
-  $('#panel').innerHTML = `<div class="head"><h2>${esc(st.n)}</h2><span class="en">${esc(st.en)}</span></div>
-    <p class="why">${esc(st.why)}<span class="cite">${esc(st.cite)}</span></p>
-    <ul class="how">${st.how.map(x => `<li>${esc(x)}</li>`).join('')}</ul>
+  $('#panel').innerHTML = `<div class="head"><h2>${esc(stName(st))}</h2>${S.lang === 'en' ? '' : `<span class="en">${esc(st.en)}</span>`}</div>
+    <p class="why">${esc(lf(st, 'why'))}<span class="cite">${esc(lf(st, 'cite'))}</span></p>
+    <ul class="how">${lf(st, 'how').map(x => `<li>${esc(x)}</li>`).join('')}</ul>
     ${body}
     <div class="recbar">
-      <button class="rec${S.recording ? ' on' : ''}" id="recBtn">${S.recording ? '녹음 멈추기' : '녹음'} <kbd>Space</kbd></button>
-      ${S.step < STEPS.length - 1 ? `<button class="btn" data-act="next">다음: ${esc(STEPS[S.step + 1].n)}</button>` : ''}
+      <button class="rec${S.recording ? ' on' : ''}" id="recBtn">${S.recording ? tl('녹음 멈추기', "Stop") : tl('녹음', "Record")} <kbd>Space</kbd></button>
+      ${S.step < STEPS.length - 1 ? `<button class="btn" data-act="next">${tl('다음', 'Next')}: ${esc(stName(STEPS[S.step + 1]))}</button>` : ''}
     </div>`;
   renderStepReadouts();
   if (st.kind === 'shadow') requestAnimationFrame(shDrawCmp);
@@ -877,19 +907,19 @@ function renderStepReadouts() {
   if (st.kind === 'sustain') {
     const el = $('#stepRO'); if (!el) return;
     const reps = S.sessionReps.vfe1 || [];
-    el.innerHTML = `<div class="ro"><b id="susNow">${fmtSec(S.sus.lastDur)}</b><span>이번 발성</span></div>
-      <div class="ro"><b>${best.vfe1 ? fmtSec(best.vfe1) : '–'}</b><span>오늘 최고</span></div>
-      <div class="reps" style="flex-basis:100%">${reps.length ? '이번 세션: ' + reps.map(fmtSec).join(', ') : '소리를 내면 자동으로 시간을 재요'}</div>`;
+    el.innerHTML = `<div class="ro"><b id="susNow">${fmtSec(S.sus.lastDur)}</b><span>${tl('이번 발성', 'Last hold')}</span></div>
+      <div class="ro"><b>${best.vfe1 ? fmtSec(best.vfe1) : '–'}</b><span>${tl('오늘 최고', "Today's best")}</span></div>
+      <div class="reps" style="flex-basis:100%">${reps.length ? tl('이번 세션: ', "This session: ") + reps.map(fmtSec).join(', ') : tl('소리를 내면 자동으로 시간을 재요', "Make a sound and it is timed automatically")}</div>`;
   }
   if (st.kind === 'notes') {
     const nb = $('#noteBtns'); if (!nb) return;
     const b4 = best.vfe4 || {};
-    nb.innerHTML = R.notes.map((m, i) => { const nm = NOTE[pc(m)]; return `<button class="btn" data-act="note" data-i="${i}" aria-pressed="${i === S.noteSel}">${noteName(m)}<small>${SOLFA[nm] || ''} ${b4[nm] ? fmtSec(b4[nm]) : ''}</small></button>`; }).join('');
+    nb.innerHTML = R.notes.map((m, i) => { const nm = NOTE[pc(m)]; return `<button class="btn" data-act="note" data-i="${i}" aria-pressed="${i === S.noteSel}">${noteName(m)}<small>${S.lang === 'en' ? '' : SOLFA[nm] || ''} ${b4[nm] ? fmtSec(b4[nm]) : ''}</small></button>`; }).join('');
     const nm = NOTE[pc(R.notes[S.noteSel])];
     const reps = S.sessionReps['n' + nm] || [];
-    $('#stepRO').innerHTML = `<div class="ro"><b id="susNow">${fmtSec(S.sus.lastDur)}</b><span>이번 발성 (${noteName(R.notes[S.noteSel])})</span></div>
-      <div class="ro"><b>${b4[nm] ? fmtSec(b4[nm]) : '–'}</b><span>오늘 최고</span></div>
-      <div class="reps" style="flex-basis:100%">${reps.length ? '이번 세션: ' + reps.map(fmtSec).join(', ') : '음 버튼을 누르면 기준음이 나오고, 소리를 내면 시간을 재요'}</div>`;
+    $('#stepRO').innerHTML = `<div class="ro"><b id="susNow">${fmtSec(S.sus.lastDur)}</b><span>${tl('이번 발성', 'Last hold')} (${noteName(R.notes[S.noteSel])})</span></div>
+      <div class="ro"><b>${b4[nm] ? fmtSec(b4[nm]) : '–'}</b><span>${tl('오늘 최고', "Today's best")}</span></div>
+      <div class="reps" style="flex-basis:100%">${reps.length ? tl('이번 세션: ', "This session: ") + reps.map(fmtSec).join(', ') : tl('음 버튼을 누르면 기준음이 나오고, 소리를 내면 시간을 재요', "Press a note to hear it, then sing and it is timed")}</div>`;
   }
 }
 
@@ -904,15 +934,15 @@ setInterval(() => {
   const ph = $('#phase');
   if (ph) {
     const el2 = T.total - T.left;
-    ph.textContent = !T.running ? (T.left === 0 ? '끝. 다음 단계로 넘어가세요.' : '일시정지') : ((el2 % 10) < 4 ? '들이마시기' : '내쉬기  스—');
+    ph.textContent = !T.running ? (T.left === 0 ? tl('끝. 다음 단계로 넘어가세요.', 'Done. Move on to the next step.') : tl('일시정지', 'Paused')) : ((el2 % 10) < 4 ? tl('들이마시기', "Breathe in") : tl('내쉬기  스—', "Breathe out  sss…"));
     $('#pacer').classList.toggle('on', T.running);
   }
-  if (!T.running) { const b = document.querySelector('[data-act="timer"]'); if (b) b.textContent = '타이머 시작'; }
+  if (!T.running) { const b = document.querySelector('[data-act="timer"]'); if (b) b.textContent = tl('타이머 시작', "Start timer"); }
 }, 200);
 
 /* ---------- recording ---------- */
-/* 무손실 녹음: 마이크 원본(float)을 그대로 모아 24-bit WAV로 쓴다.
-   AudioWorklet이 막힌 환경(CSP 등)에서는 ScriptProcessor로 대신한다. */
+/* Lossless recording: collect the raw mic floats and write a 24-bit WAV.
+   Where AudioWorklet is blocked (CSP etc.), ScriptProcessor takes over. */
 const CAP_SRC = `class VpCap extends AudioWorkletProcessor {
   constructor() {
     super(); this.on = false; this.id = 0; this.buf = new Float32Array(4096); this.n = 0;
@@ -988,7 +1018,7 @@ async function toggleRec() {
 function startRec() {
   stopPlayback();
   const meta = { step: STEPS[S.step], focus: S.focus, lang: S.textLang, targets: S.targets.map(t => t.m), shadow: shSnapshot() };
-  if (S.wav && !S.cap) status('이 브라우저에서는 WAV로 녹음할 수 없어서 압축 형식으로 녹음해요.', true);
+  if (S.wav && !S.cap) status(tl('이 브라우저에서는 WAV로 녹음할 수 없어서 압축 형식으로 녹음해요.', "This browser can't record WAV, so this take uses a compressed format."), true);
   const rec = S.wav && S.cap ? pcmRecorder(meta) : mediaRecorder(meta);
   if (!rec) return;
   S.recContour = []; S.recLast = 0; S.recBand = [0, 0];
@@ -1007,11 +1037,11 @@ function pcmRecorder(meta) {
   return { state: 'recording', stop() { this.state = 'inactive'; S.cap.stop(P); setTimeout(P.end, 1000); } };
 }
 function mediaRecorder(meta) {
-  if (!window.MediaRecorder) { status('이 브라우저는 녹음을 지원하지 않아요.', true); return null; }
+  if (!window.MediaRecorder) { status(tl('이 브라우저는 녹음을 지원하지 않아요.', "This browser doesn't support recording."), true); return null; }
   const mime = pickMime();
   let rec;
   try { rec = mime ? new MediaRecorder(S.stream, { mimeType: mime, audioBitsPerSecond: 128000 }) : new MediaRecorder(S.stream); }
-  catch (e) { status('녹음을 시작하지 못했어요 (' + (e.name || e.message) + ').', true); return null; }
+  catch (e) { status(tl('녹음을 시작하지 못했어요 (', "Couldn't start recording (") + (e.name || e.message) + ').', true); return null; }
   const chunks = [];
   rec.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
   rec.onstop = () => finishTake(new Blob(chunks, { type: rec.mimeType || mime || 'audio/webm' }), meta);
@@ -1027,7 +1057,7 @@ function stopRec() {
 }
 function updateRecUI() {
   const b = $('#recBtn');
-  if (b) { b.classList.toggle('on', S.recording); b.firstChild.textContent = S.recording ? '녹음 멈추기 ' : '녹음 '; }
+  if (b) { b.classList.toggle('on', S.recording); b.firstChild.textContent = S.recording ? tl('녹음 멈추기 ', "Stop ") : tl('녹음 ', "Record "); }
   $('#recFlag').hidden = !S.recording;
 }
 function analyze(c) {
@@ -1043,7 +1073,7 @@ function analyze(c) {
   return { p10: q(0.1), p50: q(0.5), p90: q(0.9), lo: v.length ? v[0] : null, hi: v.length ? v[v.length - 1] : null, pauses, voiced: v.length * DT };
 }
 async function finishTake(blob, meta) {
-  if (!blob.size) { status('녹음된 소리가 없어요.', true); return; }
+  if (!blob.size) { status(tl('녹음된 소리가 없어요.', "Nothing was recorded."), true); return; }
   const contour = S.recContour.slice();
   const st = meta.step;
   const take = {
@@ -1060,8 +1090,8 @@ async function finishTake(blob, meta) {
   if (S.idbOk) {
     const ok = await DB.put(take);
     if (ok) { askPersist(); if (S.full) { S.full = false; status(''); } }
-    else if (DB.err === 'QuotaExceededError') full = S.full = true;   // 공간만 모자란 거라 다음 녹음은 다시 시도
-    else { S.idbOk = false; status('이 브라우저에서는 녹음을 저장할 수 없어요. 새로고침하면 사라져요.', true); }
+    else if (DB.err === 'QuotaExceededError') full = S.full = true;   // only out of space, so the next take tries again
+    else { S.idbOk = false; status(tl('이 브라우저에서는 녹음을 저장할 수 없어요. 새로고침하면 사라져요.', "This browser can't store recordings. They will be gone after a reload."), true); }
   }
   let revealed = false;
   if (take.pending) {
@@ -1069,12 +1099,12 @@ async function finishTake(blob, meta) {
     if (pend.length >= 3) {
       for (const t of pend) { t.pending = false; if (S.idbOk) await DB.put(t); }
       revealed = true;
-      status('3번 녹음했어요. 이제 들어보고 A/B로 비교해 보세요.');
+      status(tl('3번 녹음했어요. 이제 들어보고 A/B로 비교해 보세요.', "3 takes done. Listen now and compare them with A/B."));
       S.ab = { a: pend[pend.length - 1].id, b: pend[0].id };
-    } else status('녹음 ' + pend.length + '/3. 들어보기 전에 ' + (3 - pend.length) + '번 더 읽어 보세요.');
+    } else status(tl('녹음 ' + pend.length + '/3. 들어보기 전에 ' + (3 - pend.length) + '번 더 읽어 보세요.', 'Take ' + pend.length + '/3. Read it ' + (3 - pend.length) + ' more time(s) before listening.'));
   }
   renderTakes(); renderLog(); renderStore();
-  if (full) { status('저장 공간이 부족해서 이 녹음은 새로고침하면 사라져요. 오래된 녹음을 정리하거나 먼저 파일로 저장하세요.', true); toggleClean(true); }
+  if (full) { status(tl('저장 공간이 부족해서 이 녹음은 새로고침하면 사라져요. 오래된 녹음을 정리하거나 먼저 파일로 저장하세요.', "Storage is full, so this take will be gone after a reload. Clean up old takes or save them as files first."), true); toggleClean(true); }
   if (take.shadow) shDrawCmp();
   if (S.autoplay && !take.pending && !revealed) {
     if (take.shadow && STEPS[S.step].kind === 'shadow') shPlayModel(() => setTimeout(() => playTake(take.id, () => {}), 300));
@@ -1087,7 +1117,7 @@ function urlFor(t) { if (!S.urls.has(t.id)) S.urls.set(t.id, URL.createObjectURL
 function stopPlayback() {
   if (S.audio) { S.audio.pause(); S.audio = null; }
   const prev = S.playingId; S.playingId = null;
-  if (prev) { const b = document.querySelector(`[data-play="${prev}"]`); if (b) { b.textContent = '▶'; b.setAttribute('aria-label', '재생'); } }
+  if (prev) { const b = document.querySelector(`[data-play="${prev}"]`); if (b) { b.textContent = '▶'; b.setAttribute('aria-label', tl('재생', "Play")); } }
 }
 function playTake(id, then) {
   const t = S.takes.find(x => x.id === id); if (!t || t.pending) return;
@@ -1096,26 +1126,26 @@ function playTake(id, then) {
   if (same && !then) return;
   const a = new Audio(urlFor(t));
   S.audio = a; S.playingId = id;
-  const b = document.querySelector(`[data-play="${id}"]`); if (b) { b.textContent = '■'; b.setAttribute('aria-label', '정지'); }
+  const b = document.querySelector(`[data-play="${id}"]`); if (b) { b.textContent = '■'; b.setAttribute('aria-label', tl('정지', "Stop")); }
   a.onended = () => { stopPlayback(); if (then) then(); };
-  a.play().catch(() => { stopPlayback(); status('재생하지 못했어요. 브라우저의 소리 설정을 확인하세요.', true); });
+  a.play().catch(() => { stopPlayback(); status(tl('재생하지 못했어요. 브라우저의 소리 설정을 확인하세요.', "Couldn't play. Check the browser's sound settings."), true); });
 }
 function chipsFor(t) {
-  if (t.pending) return '<span>3번 녹음한 뒤에 공개돼요</span>';
+  if (t.pending) return tl('<span>3번 녹음한 뒤에 공개돼요</span>', "<span>Revealed after 3 takes</span>");
   const A = t.a, out = [`<span><b>${fmtSec(t.dur)}</b></span>`];
   if (t.kind === 'speak') {
-    out.push(`<span>초점 <b>${FOCUS[t.focus] ? FOCUS[t.focus].label : '-'}</b></span>`);
-    if (A.p10 !== null) out.push(`<span>억양 폭 <b>${(A.p90 - A.p10).toFixed(1)}반음</b></span>`, `<span>중심음 <b>${noteName(A.p50)}</b></span>`);
-    out.push(`<span>쉼 <b>${A.pauses}회</b></span>`);
+    out.push(`<span>${tl('초점', 'Focus')} <b>${FOCUS[t.focus] ? lf(FOCUS[t.focus], 'label') : '-'}</b></span>`);
+    if (A.p10 !== null) out.push(`<span>${tl('억양 폭', 'Pitch range')} <b>${(A.p90 - A.p10).toFixed(1)}${tl('반음', ' semitones')}</b></span>`, `<span>${tl('중심음', 'Median')} <b>${noteName(A.p50)}</b></span>`);
+    out.push(`<span>${tl('쉼', 'Pauses')} <b>${A.pauses}${tl('회', '')}</b></span>`);
   } else if (t.kind === 'glide') {
-    if (A.lo !== null) out.push(`<span>음역 <b>${noteName(A.lo)}–${noteName(A.hi)}</b></span>`);
+    if (A.lo !== null) out.push(`<span>${tl('음역', 'Range')} <b>${noteName(A.lo)}–${noteName(A.hi)}</b></span>`);
   } else if (t.kind === 'shadow' && t.shadow) {
-    const lbl = t.shadow.src === 'tts' ? '"' + (t.shadow.text.length > 42 ? t.shadow.text.slice(0, 42) + '…' : t.shadow.text) + '"' : t.shadow.name + ' ' + t.shadow.sel[0].toFixed(1) + '초부터';
+    const lbl = t.shadow.src === 'tts' ? '"' + (t.shadow.text.length > 42 ? t.shadow.text.slice(0, 42) + '…' : t.shadow.text) + '"' : t.shadow.name + ' ' + tl(t.shadow.sel[0].toFixed(1) + '초부터', 'from ' + t.shadow.sel[0].toFixed(1) + ' s');
     out.push(`<span>${esc(lbl)}</span>`);
-    if (t.score != null) out.push(`<span>억양 일치 <b>${t.score}%</b></span>`);
+    if (t.score != null) out.push(`<span>${tl('억양 일치', 'Intonation match')} <b>${t.score}%</b></span>`);
   } else if (t.kind === 'scale') {
-    if (t.band !== null) out.push(`<span>띠 안 <b>${t.band}%</b></span>`);
-  } else if (A.p50 !== null) out.push(`<span>중심음 <b>${noteName(A.p50)}</b></span>`);
+    if (t.band !== null) out.push(`<span>${tl('띠 안', 'In band')} <b>${t.band}%</b></span>`);
+  } else if (A.p50 !== null) out.push(`<span>${tl('중심음', 'Median')} <b>${noteName(A.p50)}</b></span>`);
   if (/wav/.test(t.mime)) out.push(`<span><b>WAV</b> ${fmtSize(t.blob.size)}</span>`);
   return out.join('');
 }
@@ -1125,7 +1155,7 @@ function drawContour(canvas, series) {
   g.clearRect(0, 0, w, h);
   let lo = Infinity, hi = -Infinity, maxLen = 1;
   series.forEach(s => { s.c.forEach(v => { if (v > 0) { lo = Math.min(lo, v); hi = Math.max(hi, v); } }); maxLen = Math.max(maxLen, s.c.length); });
-  if (lo === Infinity) { g.fillStyle = C.muted; g.font = '400 11px system-ui'; g.fillText('음높이 없음', 4, h / 2); return; }
+  if (lo === Infinity) { g.fillStyle = C.muted; g.font = '400 11px system-ui'; g.fillText(tl('음높이 없음', "No pitch"), 4, h / 2); return; }
   lo -= 1.5; hi += 1.5; if (hi - lo < 6) { const mid = (lo + hi) / 2; lo = mid - 3; hi = mid + 3; }
   series.forEach(s => {
     g.strokeStyle = s.color; g.lineWidth = s.width || 2; g.lineCap = 'round'; g.lineJoin = 'round';
@@ -1145,21 +1175,21 @@ function renderTakes() {
   S.takes.slice(0, S.listMax).forEach(t => {
     if (t.day !== lastDay) {
       lastDay = t.day;
-      const d = document.createElement('li'); d.className = 'day'; d.textContent = t.day === tdy ? '오늘' : t.day; ul.appendChild(d);
+      const d = document.createElement('li'); d.className = 'day'; d.textContent = t.day === tdy ? tl('오늘', "Today") : t.day; ul.appendChild(d);
     }
     const tm = new Date(t.created);
     const li = document.createElement('li');
     li.className = 'take' + (t.pending ? ' pending' : '') + (S.ab.a === t.id ? ' sel-a' : '') + (S.ab.b === t.id ? ' sel-b' : '');
-    li.innerHTML = `<button class="btn play" data-play="${t.id}" aria-label="재생" ${t.pending ? 'disabled' : ''}>▶</button>
-      <div><div class="t1">${esc(t.stepName)}${t.lang && TEXTS[t.lang] ? ' (' + esc(TEXTS[t.lang].label) + ')' : ''}<time>${pad(tm.getHours())}:${pad(tm.getMinutes())}</time></div>
+    li.innerHTML = `<button class="btn play" data-play="${t.id}" aria-label="${tl('재생', 'Play')}" ${t.pending ? 'disabled' : ''}>▶</button>
+      <div><div class="t1">${esc(takeName(t))}${t.lang && TEXTS[t.lang] ? ' (' + esc(lf(TEXTS[t.lang], 'label')) + ')' : ''}<time>${pad(tm.getHours())}:${pad(tm.getMinutes())}</time></div>
       <div class="chips">${chipsFor(t)}</div></div>
       <canvas data-cv="${t.id}" aria-hidden="true"></canvas>
       <div class="acts">
-        <button class="btn sm" data-keep="${t.id}" aria-pressed="${!!t.keep}" aria-label="보관" title="보관하면 일괄 정리에서 빠져요">${t.keep ? '★' : '☆'}</button>
+        <button class="btn sm" data-keep="${t.id}" aria-pressed="${!!t.keep}" aria-label="${tl('보관', 'Keep')}" title="${tl('보관하면 일괄 정리에서 빠져요', 'Kept takes are skipped by Clean up')}">${t.keep ? '★' : '☆'}</button>
         <button class="btn sm" data-ab="a" data-id="${t.id}" ${t.pending ? 'disabled' : ''} aria-pressed="${S.ab.a === t.id}">A</button>
         <button class="btn sm" data-ab="b" data-id="${t.id}" ${t.pending ? 'disabled' : ''} aria-pressed="${S.ab.b === t.id}">B</button>
-        <button class="btn sm" data-save="${t.id}" ${t.pending ? 'disabled' : ''}>저장</button>
-        <button class="btn sm ghost" data-del="${t.id}">삭제</button></div>`;
+        <button class="btn sm" data-save="${t.id}" ${t.pending ? 'disabled' : ''}>${tl('저장', 'Save')}</button>
+        <button class="btn sm ghost" data-del="${t.id}">${tl('삭제', 'Delete')}</button></div>`;
     ul.appendChild(li);
     const c = li.querySelector('canvas');
     if (t.pending) { const { g } = fitCanvas(c); g.clearRect(0, 0, c.width, c.height); }
@@ -1168,7 +1198,7 @@ function renderTakes() {
   });
   const rest = S.takes.length - S.listMax, more = $('#moreTakes');
   more.hidden = rest <= 0;
-  if (rest > 0) more.textContent = '더 보기 (' + rest + '개 남음)';
+  if (rest > 0) more.textContent = tl('더 보기 (' + rest + '개 남음)', 'Show more (' + rest + ' left)');
   renderCompare();
 }
 function renderCompare() {
@@ -1177,13 +1207,13 @@ function renderCompare() {
   if (!A && !B) { box.hidden = true; return; }
   box.hidden = false;
   const C = colors();
-  const lab = (t, nm, col) => t ? `<span><span class="sw" style="background:${col}"></span>${nm}: ${esc(t.stepName)} ${pad(new Date(t.created).getHours())}:${pad(new Date(t.created).getMinutes())}</span>` : `<span style="color:var(--muted)">${nm}: 목록에서 ${nm} 버튼을 누르세요</span>`;
+  const lab = (t, nm, col) => t ? `<span><span class="sw" style="background:${col}"></span>${nm}: ${esc(takeName(t))} ${pad(new Date(t.created).getHours())}:${pad(new Date(t.created).getMinutes())}</span>` : `<span style="color:var(--muted)">${nm}: ${tl('목록에서 ' + nm + ' 버튼을 누르세요', 'press ' + nm + ' in the list')}</span>`;
   $('#cmpLegend').innerHTML = lab(A, 'A', C.accent) + lab(B, 'B', C.target) +
     `<span style="display:flex;gap:6px;margin-left:auto">
-      <button class="btn sm" data-cmp="a" ${A ? '' : 'disabled'}>A 듣기</button>
-      <button class="btn sm" data-cmp="b" ${B ? '' : 'disabled'}>B 듣기</button>
-      <button class="btn sm" data-cmp="ab" ${A && B ? '' : 'disabled'}>A 다음 B</button>
-      <button class="btn sm ghost" data-cmp="clear">비교 닫기</button></span>`;
+      <button class="btn sm" data-cmp="a" ${A ? '' : 'disabled'}>${tl('A 듣기', 'Play A')}</button>
+      <button class="btn sm" data-cmp="b" ${B ? '' : 'disabled'}>${tl('B 듣기', 'Play B')}</button>
+      <button class="btn sm" data-cmp="ab" ${A && B ? '' : 'disabled'}>${tl('A 다음 B', 'A then B')}</button>
+      <button class="btn sm ghost" data-cmp="clear">${tl('비교 닫기', 'Close comparison')}</button></span>`;
   const series = [];
   if (A) series.push({ c: A.contour, color: C.accent, width: 2.5 });
   if (B) series.push({ c: B.contour, color: C.target, width: 2.5 });
@@ -1191,7 +1221,7 @@ function renderCompare() {
 }
 async function deleteTake(id) {
   const t = S.takes.find(x => x.id === id); if (!t) return;
-  if (!confirm('이 녹음을 지울까요? 되돌릴 수 없어요.')) return;
+  if (!confirm(tl('이 녹음을 지울까요? 되돌릴 수 없어요.', "Delete this take? This can't be undone."))) return;
   if (S.playingId === id) stopPlayback();
   S.takes = S.takes.filter(x => x.id !== id);
   if (S.urls.has(id)) { URL.revokeObjectURL(S.urls.get(id)); S.urls.delete(id); }
@@ -1205,41 +1235,41 @@ async function saveTake(id) {
   const d = new Date(t.created);
   const name = `voice-${t.day}-${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}-${t.step}.${ext}`;
   if (S.dl) {
-    try { await S.dl.save({ filename: name, data: t.blob }); status('저장했어요: ' + name); }
+    try { await S.dl.save({ filename: name, data: t.blob }); status(tl('저장했어요: ', "Saved: ") + name); }
     catch (e) {
       const code = e && e.code;
       if (code === 'declined') return;
-      if (code === 'rate_limited') status('저장 창이 이미 열려 있어요. 잠시 뒤 다시 누르세요.', true);
-      else status('이 화면에서는 파일로 저장할 수 없어요.', true);
+      if (code === 'rate_limited') status(tl('저장 창이 이미 열려 있어요. 잠시 뒤 다시 누르세요.', "A save dialog is already open. Try again in a moment."), true);
+      else status(tl('이 화면에서는 파일로 저장할 수 없어요.', "Files can't be saved from this view."), true);
     }
     return;
   }
-  if (window.claude) { status('이 화면에서는 파일로 저장할 수 없어요.', true); return; }
-  // claude.ai 밖(로컬 파일, localhost)에서는 일반 다운로드
+  if (window.claude) { status(tl('이 화면에서는 파일로 저장할 수 없어요.', "Files can't be saved from this view."), true); return; }
+  // outside claude.ai (local file, localhost) use a plain download
   const url = URL.createObjectURL(t.blob), a = document.createElement('a');
   a.href = url; a.download = name;
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 60000);
-  status('브라우저 다운로드로 저장했어요: ' + name);
+  status(tl('브라우저 다운로드로 저장했어요: ', "Saved via browser download: ") + name);
 }
 /* ---------- storage ---------- */
 async function renderStore() {
   const perMin = S.wav ? (S.ctx ? S.ctx.sampleRate : 48000) * 3 * 60 : 128000 / 8 * 60;
-  const txt = (S.wav ? '무손실 WAV (24-bit)' : '압축 녹음') + ', 1분에 약 ' + fmtSize(perMin) + ' · 녹음 ' + S.takes.length + '개 ' + fmtSize(sizeOf(S.takes));
+  const txt = (S.wav ? tl('무손실 WAV (24-bit)', 'Lossless WAV (24-bit)') : tl('압축 녹음', 'Compressed')) + tl(', 1분에 약 ' + fmtSize(perMin), ', about ' + fmtSize(perMin) + '/min') + ' · ' + tl('녹음 ' + S.takes.length + '개 ', S.takes.length + ' takes ') + fmtSize(sizeOf(S.takes));
   try {
     if (navigator.storage && navigator.storage.estimate) {
-      const e = await navigator.storage.estimate();   // 브라우저 집계라 지운 직후엔 늦게 줄어든다
+      const e = await navigator.storage.estimate();   // the browser's own tally, which shrinks late after deletes
       S.est = { usage: e.usage || 0, quota: e.quota || 0, persisted: navigator.storage.persisted ? await navigator.storage.persisted() : false };
     }
   } catch (e) {}
   const full = !!(S.est && S.est.quota && S.est.usage / S.est.quota > 0.8);
   const el = $('#storeInfo');
-  el.textContent = txt + (full ? ' · 공간이 거의 찼어요' : '');
+  el.textContent = txt + (full ? tl(' · 공간이 거의 찼어요', " · storage almost full") : '');
   el.classList.toggle('warn', full);
   renderClean();
 }
 async function askPersist() {
-  // 공간이 모자랄 때 브라우저가 이 페이지 데이터를 지우지 않도록 한 번만 요청
+  // ask once, so the browser doesn't evict this page's data when space runs low
   try {
     if (!navigator.storage || !navigator.storage.persist || store.get('vp-persist-asked', false)) return;
     if (await navigator.storage.persisted()) return;
@@ -1252,13 +1282,13 @@ function sizeOf(list) { return list.reduce((s, x) => s + (x.blob ? x.blob.size :
 function renderClean() {
   const box = $('#cleanPanel'); if (box.hidden) return;
   const tk = S.takes, ms = S.sh.models, E = S.est, tg = cleanTargets();
-  const ages = [[1, '하루'], [7, '7일'], [14, '14일'], [30, '30일'], [90, '90일']]
+  const ages = [[1, tl('하루', "1 day")], [7, tl('7일', "7 days")], [14, tl('14일', "14 days")], [30, tl('30일', "30 days")], [90, tl('90일', "90 days")]]
     .map(([d, l]) => `<option value="${d}" ${d === S.cleanAge ? 'selected' : ''}>${l}</option>`).join('');
-  box.innerHTML = `<p>녹음 ${tk.length}개 ${fmtSize(sizeOf(tk))} (WAV ${tk.filter(t => /wav/.test(t.mime)).length}개, 보관 ${tk.filter(t => t.keep).length}개) · 쉐도잉 파일 ${ms.length}개 ${fmtSize(sizeOf(ms))}</p>
-    <p>${E ? '브라우저 사용량 ' + fmtSize(E.usage) + (E.quota ? ' / 한도 ' + fmtSize(E.quota) : '') + ' · ' : ''}자동 삭제 보호 ${E && E.persisted ? '켜짐' : '꺼짐 (공간이 모자라면 브라우저가 지울 수 있어요)'}</p>
-    <div class="controls"><select id="cleanAge" aria-label="기간">${ages}</select><span>보다 오래된 녹음</span>
-      <button class="btn" id="cleanGo" ${tg.length ? '' : 'disabled'}>${tg.length ? '지우기 (' + tg.length + '개, ' + fmtSize(sizeOf(tg)) + ')' : '지울 녹음 없음'}</button></div>
-    <p class="clean-note">보관(★)한 녹음은 빼고 지워요. 지우면 되돌릴 수 없으니 필요한 건 먼저 저장하세요.</p>`;
+  box.innerHTML = `<p>${tl('녹음 ' + tk.length + '개 ', tk.length + ' takes ')}${fmtSize(sizeOf(tk))} (WAV ${tk.filter(t => /wav/.test(t.mime)).length}${tl('개, 보관 ', ', kept ')}${tk.filter(t => t.keep).length}${tl('개', '')}) · ${tl('쉐도잉 파일 ' + ms.length + '개 ', ms.length + ' shadowing files ')}${fmtSize(sizeOf(ms))}</p>
+    <p>${E ? tl('브라우저 사용량 ', 'Browser usage ') + fmtSize(E.usage) + (E.quota ? tl(' / 한도 ', ' / quota ') + fmtSize(E.quota) : '') + ' · ' : ''}${tl('자동 삭제 보호 ', 'Eviction protection ')}${E && E.persisted ? tl('켜짐', 'on') : tl('꺼짐 (공간이 모자라면 브라우저가 지울 수 있어요)', 'off (the browser may delete data when space runs low)')}</p>
+    <div class="controls"><select id="cleanAge" aria-label="${tl('기간', 'Age')}">${ages}</select><span>${tl('보다 오래된 녹음', 'or older')}</span>
+      <button class="btn" id="cleanGo" ${tg.length ? '' : 'disabled'}>${tg.length ? tl('지우기 (' + tg.length + '개, ', 'Delete (' + tg.length + ' takes, ') + fmtSize(sizeOf(tg)) + ')' : tl('지울 녹음 없음', 'Nothing to delete')}</button></div>
+    <p class="clean-note">${tl('보관(★)한 녹음은 빼고 지워요. 지우면 되돌릴 수 없으니 필요한 건 먼저 저장하세요.', "Kept (★) takes are skipped. Deleting can't be undone, so save what you need first.")}</p>`;
 }
 function toggleClean(open) {
   const box = $('#cleanPanel');
@@ -1269,15 +1299,15 @@ function toggleClean(open) {
 async function cleanOld() {
   const tg = cleanTargets(); if (!tg.length) return;
   const size = sizeOf(tg);
-  if (!confirm(tg.length + '개 녹음(' + fmtSize(size) + ')을 지울까요? 되돌릴 수 없어요.')) return;
+  if (!confirm(tl(tg.length + '개 녹음(' + fmtSize(size) + ')을 지울까요? 되돌릴 수 없어요.', 'Delete ' + tg.length + ' takes (' + fmtSize(size) + ")? This can't be undone."))) return;
   const ids = new Set(tg.map(t => t.id));
   if (ids.has(S.playingId)) stopPlayback();
-  if (S.idbOk && !(await DB.delMany([...ids]))) { status('녹음을 지우지 못했어요. 다시 시도해 주세요.', true); return; }
+  if (S.idbOk && !(await DB.delMany([...ids]))) { status(tl('녹음을 지우지 못했어요. 다시 시도해 주세요.', "Couldn't delete the takes. Please try again."), true); return; }
   S.takes = S.takes.filter(t => !ids.has(t.id));
   ids.forEach(id => { if (S.urls.has(id)) { URL.revokeObjectURL(S.urls.get(id)); S.urls.delete(id); } });
   if (ids.has(S.ab.a)) S.ab.a = null;
   if (ids.has(S.ab.b)) S.ab.b = null;
-  status(tg.length + '개 녹음을 지웠어요 (' + fmtSize(size) + ').');
+  status(tl(tg.length + '개 녹음을 지웠어요 (' + fmtSize(size) + ').', 'Deleted ' + tg.length + ' takes (' + fmtSize(size) + ').'));
   renderTakes(); renderLog(); renderStore();
 }
 async function toggleKeep(id) {
@@ -1296,14 +1326,14 @@ function renderLog() {
   const tbl = $('#logTable');
   $('#logEmpty').hidden = days.length > 0;
   if (!days.length) { tbl.innerHTML = ''; return; }
-  tbl.innerHTML = `<thead><tr><th>날짜</th><th>"이" 최장</th><th>음역</th><th>폭</th><th>다섯 음 평균</th><th>녹음</th></tr></thead><tbody>` +
+  tbl.innerHTML = `<thead><tr>${tl('<th>날짜</th><th>"이" 최장</th><th>음역</th><th>폭</th><th>다섯 음 평균</th><th>녹음</th>', '<th>Date</th><th>Longest "ee"</th><th>Range</th><th>Span</th><th>Five-note avg</th><th>Takes</th>')}</tr></thead><tbody>` +
     days.map(k => {
       const d = log[k], n = d.vfe4 ? Object.values(d.vfe4) : [];
       const avg = n.length ? n.reduce((a, b) => a + b, 0) / n.length : null;
       return `<tr><td>${k}</td><td>${d.vfe1 ? fmtSec(d.vfe1) : '–'}</td>
         <td>${d.lo != null ? noteName(d.lo) + '–' + noteName(d.hi) : '–'}</td>
-        <td>${d.lo != null ? Math.round(d.hi - d.lo) + '반음' : '–'}</td>
-        <td>${avg !== null ? fmtSec(avg) + ' (' + n.length + '음)' : '–'}</td>
+        <td>${d.lo != null ? Math.round(d.hi - d.lo) + tl('반음', " semitones") : '–'}</td>
+        <td>${avg !== null ? fmtSec(avg) + ' (' + n.length + tl('음)', " notes)") : '–'}</td>
         <td>${counts[k] || 0}</td></tr>`;
     }).join('') + '</tbody>';
 }
@@ -1313,7 +1343,7 @@ const SH_SETS = {
   daily: { label: 'Everyday', s: ['Could you say that one more time?', 'I will be there in about ten minutes.', 'It is not what I expected, but I like it.', 'Let me think about it and get back to you.', 'What time works best for you?', 'I am really glad we finally got to meet.'] },
   work: { label: 'Work', s: ['Thanks for taking the time to meet with me.', 'Let me walk you through the main results.', 'The biggest risk is the timeline, not the budget.', 'Could you clarify what you mean by that?', 'I would suggest we test it on a smaller scale first.', 'Does anyone have questions before we move on?'] },
   pairs: { label: 'Sound pairs (r/l, f/p, v/b, th)', s: ['light, right. The light is on the right.', 'fan, pan. Put the pan next to the fan.', 'very, berry. It is a very sweet berry.', 'think, sink. I think the sink is full.', 'three, tree. There are three tall trees.', 'walk, work. I walk to work every day.', 'ship, sheep. The sheep are on the ship.', 'lock, rock. Lock the door behind the rock.'] },
-  passage: { label: '낭독 글을 문장별로', s: null }
+  passage: { label: '낭독 글을 문장별로', labelEn: "Reading text, sentence by sentence", s: null }
 };
 S.sh = {
   src: store.get('vp-sh-src', 'tts'), set: store.get('vp-sh-set', 'daily'), idx: 0,
@@ -1343,7 +1373,7 @@ if ('speechSynthesis' in window) {
   };
 }
 function shSay(text, onEnd) {
-  if (!('speechSynthesis' in window)) { status('이 브라우저에서는 음성 합성을 쓸 수 없어요. 원어민 녹음 파일 모드를 쓰세요.', true); return; }
+  if (!('speechSynthesis' in window)) { status(tl('이 브라우저에서는 음성 합성을 쓸 수 없어요. 원어민 녹음 파일 모드를 쓰세요.', "Speech synthesis isn't available in this browser. Use the native-speaker file mode."), true); return; }
   speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
   const v = S.sh.voices.find(x => x.voiceURI === S.sh.voiceURI) || S.sh.voices[0];
@@ -1366,27 +1396,27 @@ function shStopModel() {
 function shPlayModel(onEnd) {
   stopPlayback(); shStopModel();
   if (S.sh.src === 'tts') { const s = shSentences()[S.sh.idx]; if (s) shSay(s, onEnd); return; }
-  if (!S.sh.model || !S.sh.sel) { status('먼저 원어민 음성 파일을 올리세요.', true); return; }
+  if (!S.sh.model || !S.sh.sel) { status(tl('먼저 원어민 음성 파일을 올리세요.', "Upload a native-speaker audio file first."), true); return; }
   if (!S.sh.audio) S.sh.audio = new Audio();
   const a = S.sh.audio, url = shModelUrl();
   if (a.src !== url) a.src = url;
   a.playbackRate = S.sh.rate; a.preservesPitch = true; a.webkitPreservesPitch = true;
   S.sh.playEnd = S.sh.sel[1]; S.sh.onModelEnd = onEnd || null; S.sh.playing = true;
-  const go = () => { a.currentTime = S.sh.sel[0]; a.playbackRate = S.sh.rate; a.play().catch(() => { S.sh.playing = false; status('모델 음성을 재생하지 못했어요.', true); }); };
+  const go = () => { a.currentTime = S.sh.sel[0]; a.playbackRate = S.sh.rate; a.play().catch(() => { S.sh.playing = false; status(tl('모델 음성을 재생하지 못했어요.', "Couldn't play the model audio."), true); }); };
   if (a.readyState >= 1) go(); else a.addEventListener('loadedmetadata', go, { once: true });
 }
 async function shGo() {
   if (S.recording) { stopRec(); return; }
   if (!S.live) { await startMic(); if (!S.live) return; }
-  if (S.sh.src === 'file' && !S.sh.model) { status('먼저 원어민 음성 파일을 올리세요.', true); return; }
+  if (S.sh.src === 'file' && !S.sh.model) { status(tl('먼저 원어민 음성 파일을 올리세요.', "Upload a native-speaker audio file first."), true); return; }
   if (S.sh.mode === 'after') {
-    status('모델을 듣고, 끝나면 바로 따라 하세요. 말을 멈추면 녹음이 자동으로 끝나요.');
+    status(tl('모델을 듣고, 끝나면 바로 따라 하세요. 말을 멈추면 녹음이 자동으로 끝나요.', "Listen to the model, then repeat right after it. Recording stops on its own when you stop speaking."));
     shPlayModel(() => setTimeout(() => {
       if (STEPS[S.step].kind !== 'shadow' || S.recording) return;
       startRec(); S.sh.autoStop = true; S.sh.heard = false; S.sh.lastV = performance.now();
     }, 250));
   } else {
-    status('모델과 동시에 말하세요. 모델이 끝나면 녹음도 끝나요.');
+    status(tl('모델과 동시에 말하세요. 모델이 끝나면 녹음도 끝나요.', "Speak along with the model. Recording stops when the model ends."));
     startRec(); S.sh.autoStop = false;
     shPlayModel(() => setTimeout(() => { if (S.recording) stopRec(); }, 700));
   }
@@ -1487,7 +1517,7 @@ async function shAnalyze(buf) {
   const raw = new Array(frames).fill(0);
   for (let k = 0; k < frames; k++) {
     if (rmsArr[k] > thr) { const e = endAt(k); const f = yin(x.subarray(e - N, e), sr); raw[k] = f > 50 && f < 1200 ? f : 0; }
-    if (k % 250 === 0) { status('음높이 분석 중... ' + Math.round(k / frames * 100) + '%'); await new Promise(r => setTimeout(r, 0)); }
+    if (k % 250 === 0) { status(tl('음높이 분석 중... ', "Analyzing pitch... ") + Math.round(k / frames * 100) + '%'); await new Promise(r => setTimeout(r, 0)); }
   }
   const out = [];
   for (let k = 0; k < frames; k++) {
@@ -1499,54 +1529,54 @@ async function shAnalyze(buf) {
 }
 async function shLoadFile(file) {
   if (!file) return;
-  if (file.size > 60 * 1024 * 1024) { status('파일이 너무 커요. 60MB 이하의 짧은 클립을 쓰세요.', true); return; }
+  if (file.size > 60 * 1024 * 1024) { status(tl('파일이 너무 커요. 60MB 이하의 짧은 클립을 쓰세요.', "File too large. Use a short clip under 60 MB."), true); return; }
   const ctx = ensureCtx(); if (!ctx) return;
-  status('파일을 읽는 중...');
+  status(tl('파일을 읽는 중...', "Reading file..."));
   let buf;
   try { buf = await ctx.decodeAudioData(await file.arrayBuffer()); }
-  catch (e) { status('이 파일을 읽지 못했어요. mp3, m4a, wav 파일을 써 보세요.', true); return; }
+  catch (e) { status(tl('이 파일을 읽지 못했어요. mp3, m4a, wav 파일을 써 보세요.', "Couldn't read this file. Try an mp3, m4a or wav file."), true); return; }
   const contour = await shAnalyze(buf);
   const model = { id: 'm' + Date.now().toString(36), name: file.name.replace(/\.[^.]+$/, ''), created: Date.now(), dur: Math.min(buf.duration, 300), contour, blob: file };
   S.sh.models.unshift(model);
   if (S.idbOk) await DB.mput(model);
   shSelectModel(model.id);
-  status('분석 끝. 구간 ' + S.sh.segs.length + '개를 찾았어요. 곡선을 드래그해서 직접 고를 수도 있어요.' + (buf.duration > 300 ? ' (앞 5분만 썼어요)' : ''));
+  status(tl('분석 끝. 구간 ' + S.sh.segs.length + '개를 찾았어요. 곡선을 드래그해서 직접 고를 수도 있어요.', 'Analysis done. Found ' + S.sh.segs.length + ' segments. You can also drag on the curve to pick your own.') + (buf.duration > 300 ? tl(' (앞 5분만 썼어요)', ' (used the first 5 minutes only)') : ''));
   renderPanel();
 }
 function shPanelHTML() {
   const sh = S.sh, tts = sh.src === 'tts';
-  const src = `<div class="seg sh-src" role="radiogroup" aria-label="모델 음성">
-    <button role="radio" data-act="sh-src" data-v="tts" aria-checked="${tts}">음성 합성 (TTS)</button>
-    <button role="radio" data-act="sh-src" data-v="file" aria-checked="${!tts}">원어민 녹음 파일</button></div>`;
+  const src = `<div class="seg sh-src" role="radiogroup" aria-label="${tl('모델 음성', 'Model voice')}">
+    <button role="radio" data-act="sh-src" data-v="tts" aria-checked="${tts}">${tl('음성 합성 (TTS)', 'Speech synthesis (TTS)')}</button>
+    <button role="radio" data-act="sh-src" data-v="file" aria-checked="${!tts}">${tl('원어민 녹음 파일', 'Native-speaker file')}</button></div>`;
   let mid = '';
   if (tts) {
     const sents = shSentences(); if (sh.idx >= sents.length) sh.idx = 0;
-    const setOpts = Object.entries(SH_SETS).map(([k, v]) => `<option value="${k}" ${k === sh.set ? 'selected' : ''}>${esc(v.label)}</option>`).join('');
+    const setOpts = Object.entries(SH_SETS).map(([k, v]) => `<option value="${k}" ${k === sh.set ? 'selected' : ''}>${esc(lf(v, 'label'))}</option>`).join('');
     const vOpts = sh.voices.map(v => `<option value="${esc(v.voiceURI)}" ${v.voiceURI === sh.voiceURI ? 'selected' : ''}>${esc(v.name)} (${esc(v.lang)})</option>`).join('');
-    mid = `<div class="sh-row"><select id="shSet" aria-label="문장 세트">${setOpts}</select>
-      ${sh.voices.length ? `<select id="shVoice" aria-label="목소리">${vOpts}</select>` : '<span class="sh-count">영어 합성 음성을 찾는 중이에요. 계속 없으면 원어민 녹음 파일을 쓰세요.</span>'}</div>
-      <p class="read sh-sentence" lang="en">${esc(sents[sh.idx] || '낭독 단계에서 글을 먼저 고르거나 입력하세요.')}</p>
-      <div class="sh-row"><button class="btn" data-act="sh-prev">이전</button>
-        <button class="btn" data-act="sh-listen">듣기</button>
-        <button class="btn" data-act="sh-next">다음</button>
+    mid = `<div class="sh-row"><select id="shSet" aria-label="${tl('문장 세트', 'Sentence set')}">${setOpts}</select>
+      ${sh.voices.length ? `<select id="shVoice" aria-label="${tl('목소리', 'Voice')}">${vOpts}</select>` : tl('<span class="sh-count">영어 합성 음성을 찾는 중이에요. 계속 없으면 원어민 녹음 파일을 쓰세요.</span>', "<span class=\"sh-count\">Looking for an English synthesis voice. If none shows up, use a native-speaker file.</span>")}</div>
+      <p class="read sh-sentence" lang="en">${esc(sents[sh.idx] || tl('낭독 단계에서 글을 먼저 고르거나 입력하세요.', "Pick or enter a text in the reading step first."))}</p>
+      <div class="sh-row"><button class="btn" data-act="sh-prev">${tl('이전', 'Previous')}</button>
+        <button class="btn" data-act="sh-listen">${tl('듣기', 'Listen')}</button>
+        <button class="btn" data-act="sh-next">${tl('다음', 'Next')}</button>
         <span class="sh-count">${sents.length ? (sh.idx + 1) + ' / ' + sents.length : ''}</span></div>`;
   } else {
     const mOpts = sh.models.map(m => `<option value="${m.id}" ${sh.model && m.id === sh.model.id ? 'selected' : ''}>${esc(m.name)} (${fmtClock(m.dur)})</option>`).join('');
-    mid = `<div class="sh-row"><label class="btn">파일 올리기<input type="file" id="shFile" accept="audio/*,.mp3,.m4a,.wav,.aac" hidden></label>
-      ${sh.models.length ? `<select id="shModel" aria-label="모델 파일">${mOpts}</select><button class="btn ghost sm" data-act="sh-delmodel">이 파일 지우기</button>` : '<span class="sh-count">원어민 음성 파일(mp3, m4a, wav)을 올리면 쉬는 곳마다 구간으로 잘라 줘요. 5분 이하 권장.</span>'}</div>
-      ${sh.model ? `<canvas id="shCv" aria-label="모델 음높이 곡선. 클릭하면 구간 선택, 드래그하면 직접 지정"></canvas>
-      <div class="sh-row"><button class="btn" data-act="sh-prev">이전 구간</button>
-        <button class="btn" data-act="sh-listen">구간 듣기</button>
-        <button class="btn" data-act="sh-next">다음 구간</button>
+    mid = `<div class="sh-row"><label class="btn">${tl('파일 올리기', 'Upload file')}<input type="file" id="shFile" accept="audio/*,.mp3,.m4a,.wav,.aac" hidden></label>
+      ${sh.models.length ? `<select id="shModel" aria-label="${tl('모델 파일', 'Model file')}">${mOpts}</select><button class="btn ghost sm" data-act="sh-delmodel">${tl('이 파일 지우기', 'Delete this file')}</button>` : tl('<span class="sh-count">원어민 음성 파일(mp3, m4a, wav)을 올리면 쉬는 곳마다 구간으로 잘라 줘요. 5분 이하 권장.</span>', "<span class=\"sh-count\">Upload a native-speaker audio file (mp3, m4a, wav) and it is split into segments at each pause. 5 minutes or less recommended.</span>")}</div>
+      ${sh.model ? `<canvas id="shCv" aria-label="${tl('모델 음높이 곡선. 클릭하면 구간 선택, 드래그하면 직접 지정', 'Model pitch curve. Click to pick a segment, drag to select your own')}"></canvas>
+      <div class="sh-row"><button class="btn" data-act="sh-prev">${tl('이전 구간', 'Previous segment')}</button>
+        <button class="btn" data-act="sh-listen">${tl('구간 듣기', 'Play segment')}</button>
+        <button class="btn" data-act="sh-next">${tl('다음 구간', 'Next segment')}</button>
         <span class="sh-count" id="shSegInfo"></span>
-        <label class="tog"><input type="checkbox" id="shLoop" ${sh.loop ? 'checked' : ''}> 구간 듣기 반복</label></div>` : ''}`;
+        <label class="tog"><input type="checkbox" id="shLoop" ${sh.loop ? 'checked' : ''}> ${tl('구간 듣기 반복', 'Loop segment')}</label></div>` : ''}`;
   }
-  const modes = `<div class="focus" role="radiogroup" aria-label="방식">
-    <label><input type="radio" name="shMode" value="after" ${sh.mode === 'after' ? 'checked' : ''}>듣고 따라 하기 <span style="color:var(--muted)">listen &amp; repeat</span></label>
-    <label><input type="radio" name="shMode" value="along" ${sh.mode === 'along' ? 'checked' : ''}>겹쳐 말하기 <span style="color:var(--muted)">shadowing</span></label></div>`;
+  const modes = `<div class="focus" role="radiogroup" aria-label="${tl('방식', 'Mode')}">
+    <label><input type="radio" name="shMode" value="after" ${sh.mode === 'after' ? 'checked' : ''}>${tl('듣고 따라 하기 <span style="color:var(--muted)">listen &amp; repeat</span>', 'Listen &amp; repeat')}</label>
+    <label><input type="radio" name="shMode" value="along" ${sh.mode === 'along' ? 'checked' : ''}>${tl('겹쳐 말하기 <span style="color:var(--muted)">shadowing</span>', 'Shadowing (speak along)')}</label></div>`;
   return `${src}${mid}${modes}
-    <div class="sh-row"><label class="range">속도 <input type="range" id="shRate" min="0.6" max="1" step="0.05" value="${sh.rate}"> <span id="shRateV">${Math.round(sh.rate * 100)}%</span></label>
-      <button class="btn" data-act="sh-go">${sh.mode === 'after' ? '듣고 따라 녹음' : '같이 녹음'}</button></div>
+    <div class="sh-row"><label class="range">${tl('속도', 'Speed')} <input type="range" id="shRate" min="0.6" max="1" step="0.05" value="${sh.rate}"> <span id="shRateV">${Math.round(sh.rate * 100)}%</span></label>
+      <button class="btn" data-act="sh-go">${sh.mode === 'after' ? tl('듣고 따라 녹음', "Listen, then record") : tl('같이 녹음', "Record along")}</button></div>
     <div class="sh-cmp" id="shCmpBox" hidden><div class="sh-score" id="shScore"></div><canvas id="shCmp" aria-hidden="true"></canvas></div>`;
 }
 function shDrawCmp() {
@@ -1556,8 +1586,8 @@ function shDrawCmp() {
   box.hidden = false;
   const C = colors();
   $('#shScore').innerHTML = t.shadow.src === 'file'
-    ? `<span class="sw" style="background:${C.target}"></span>모델 <span class="sw" style="background:${C.accent};margin-left:12px"></span>나 <span style="margin-left:14px">억양 모양 일치 <b>${t.score == null ? '–' : t.score + '%'}</b></span> <span>(각자 중심음 기준, 길이 맞춤, 참고용)</span>`
-    : `<span class="sw" style="background:${C.accent}"></span>방금 녹음의 억양 곡선 <span>(합성 음성은 곡선 비교가 안 돼요. 원어민 파일을 쓰면 두 곡선을 겹쳐 보여 줘요)</span>`;
+    ? `<span class="sw" style="background:${C.target}"></span>${tl('모델', 'Model')} <span class="sw" style="background:${C.accent};margin-left:12px"></span>${tl('나', 'You')} <span style="margin-left:14px">${tl('억양 모양 일치', 'Intonation shape match')} <b>${t.score == null ? '–' : t.score + '%'}</b></span> <span>${tl('(각자 중심음 기준, 길이 맞춤, 참고용)', '(relative to each median, time-aligned, for reference only)')}</span>`
+    : `<span class="sw" style="background:${C.accent}"></span>${tl('방금 녹음의 억양 곡선', 'Intonation curve of your last take')} <span>${tl('(합성 음성은 곡선 비교가 안 돼요. 원어민 파일을 쓰면 두 곡선을 겹쳐 보여 줘요)', "(synthesized speech can't be compared; with a native-speaker file both curves are overlaid)")}</span>`;
   const series = [];
   if (t.shadow.contour) series.push({ c: shStretch(shRel(shTrim(t.shadow.contour)), 200), color: C.target });
   series.push({ c: shStretch(shRel(shTrim(t.contour)), 200), color: C.accent });
@@ -1576,7 +1606,7 @@ function drawShadow(now) {
   const { g, w, h } = fitCanvas(cvs), C = colors(), c = sh.model.contour, dur = sh.model.dur;
   g.clearRect(0, 0, w, h);
   const v = c.filter(x => x > 0).sort((a, b) => a - b);
-  if (!v.length) { g.fillStyle = C.muted; g.font = '400 13px system-ui'; g.fillText('음높이를 찾지 못했어요', 10, h / 2); return; }
+  if (!v.length) { g.fillStyle = C.muted; g.font = '400 13px system-ui'; g.fillText(tl('음높이를 찾지 못했어요', "No pitch found"), 10, h / 2); return; }
   const lo = v[Math.floor(v.length * 0.03)] - 2, hi = v[Math.floor(v.length * 0.97)] + 2;
   const X = t => t / dur * w, Y = mm => 6 + (1 - (Math.max(lo, Math.min(hi, mm)) - lo) / (hi - lo)) * (h - 18);
   g.fillStyle = C.grid;
@@ -1593,7 +1623,7 @@ function drawShadow(now) {
   if (sh.playing && sh.audio) { const px = X(sh.audio.currentTime); g.strokeStyle = C.accent; g.lineWidth = 2; g.beginPath(); g.moveTo(px, 0); g.lineTo(px, h); g.stroke(); }
   const info = document.getElementById('shSegInfo');
   if (info && sh.sel) {
-    const txt = (sh.segs.length ? '구간 ' + (sh.seg + 1) + '/' + sh.segs.length + '   ' : '') + sh.sel[0].toFixed(1) + '–' + sh.sel[1].toFixed(1) + '초';
+    const txt = (sh.segs.length ? tl('구간 ', "Segment ") + (sh.seg + 1) + '/' + sh.segs.length + '   ' : '') + sh.sel[0].toFixed(1) + '–' + sh.sel[1].toFixed(1) + tl('초', " s");
     if (txt !== info.textContent) info.textContent = txt;
   }
 }
@@ -1611,7 +1641,7 @@ function shAct(act, b) {
   }
   else if (act === 'sh-go') shGo();
   else if (act === 'sh-delmodel' && sh.model) {
-    if (!confirm('이 모델 파일을 지울까요? 내 녹음은 남아요.')) return;
+    if (!confirm(tl('이 모델 파일을 지울까요? 내 녹음은 남아요.', "Delete this model file? Your own takes are kept."))) return;
     shStopModel();
     const id = sh.model.id;
     sh.models = sh.models.filter(m => m.id !== id);
@@ -1656,11 +1686,26 @@ document.addEventListener('pointerup', e => {
 function renderVoice() {
   document.querySelectorAll('[data-voice]').forEach(b => b.setAttribute('aria-checked', String(b.dataset.voice === S.voice)));
 }
+function applyLang() {
+  const en = S.lang === 'en';
+  document.documentElement.lang = S.lang;
+  document.title = tl('목소리 연습실', 'Voice Practice');
+  document.querySelectorAll('[data-aria]').forEach(el => el.setAttribute('aria-label', el.dataset.aria.split('|')[en ? 1 : 0]));
+  const b = $('#langBtn');
+  b.textContent = en ? '한국어' : 'English';
+  b.lang = en ? 'ko' : 'en';
+  b.setAttribute('aria-label', en ? '한국어로 보기' : 'Switch to English');
+  updateMicUI();
+}
+$('#langBtn').addEventListener('click', () => {
+  S.lang = S.lang === 'en' ? 'ko' : 'en'; store.set('vp-lang', S.lang);
+  applyLang(); renderSteps(); renderPanel(); renderTakes(); renderLog(); renderStore();
+});
 document.querySelectorAll('[data-voice]').forEach(b => b.addEventListener('click', () => {
   S.voice = b.dataset.voice; store.set('vp-voice', S.voice); S.scaleRoot = null;
   renderVoice(); setTargets(); renderPanel();
 }));
-$('#micBtn').addEventListener('click', () => { if (S.live) { stopStream(); updateMicUI(); status('마이크를 껐어요.'); } else startMic(); });
+$('#micBtn').addEventListener('click', () => { if (S.live) { stopStream(); updateMicUI(); status(tl('마이크를 껐어요.', "Microphone turned off.")); } else startMic(); });
 $('#dev').addEventListener('change', e => { S.devId = e.target.value; store.set('vp-dev', S.devId); S.autoPicked = true; startMic(S.devId); });
 $('#steps').addEventListener('click', e => { const b = e.target.closest('[data-step]'); if (b) goStep(+b.dataset.step); });
 $('#autoplay').checked = S.autoplay;
@@ -1686,7 +1731,7 @@ $('#panel').addEventListener('click', e => {
     const T = S.timer;
     if (T.left <= 0) T.left = T.total;
     T.running = !T.running; T.last = performance.now();
-    b.textContent = T.running ? '일시정지' : '타이머 시작';
+    b.textContent = T.running ? tl('일시정지', "Pause") : tl('타이머 시작', "Start timer");
     const p = $('#pacer'); if (p) p.classList.toggle('on', T.running);
   }
   else if (act === 'timer-reset') { S.timer.left = S.timer.total; S.timer.running = false; renderPanel(); }
@@ -1698,7 +1743,7 @@ $('#panel').addEventListener('click', e => {
   }
 });
 $('#panel').addEventListener('change', e => {
-  if (e.target.name === 'focus') { S.focus = e.target.value; store.set('vp-focus', S.focus); const tip = $('#focusTip'); if (tip) tip.textContent = FOCUS[S.focus].tip; }
+  if (e.target.name === 'focus') { S.focus = e.target.value; store.set('vp-focus', S.focus); const tip = $('#focusTip'); if (tip) tip.textContent = lf(FOCUS[S.focus], 'tip'); }
   if (e.target.dataset.act === 'blind') { S.blind = e.target.checked; store.set('vp-blind', S.blind); }
   if (e.target.id === 'rootSel') { S.scaleRoot = +e.target.value; setTargets(); }
   if (shChange(e)) return;
@@ -1739,6 +1784,7 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () 
 
 /* ---------- init ---------- */
 (async () => {
+  applyLang();
   renderVoice();
   goStep(S.step);
   renderLog();

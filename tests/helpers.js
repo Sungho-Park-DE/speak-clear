@@ -1,6 +1,6 @@
 import { expect } from '@playwright/test';
 
-// 가짜 마이크: 220 Hz(A3) + 약한 배음을 MediaStream으로 돌려준다. 스피커에는 연결하지 않는다.
+// Fake mic: returns 220 Hz (A3) plus weak harmonics as a MediaStream. Not connected to the speakers.
 function fakeMic() {
   const ac = new AudioContext(), mix = ac.createGain(), dst = ac.createMediaStreamDestination();
   mix.gain.value = 0.3 / 1.4;
@@ -13,23 +13,24 @@ function fakeMic() {
   navigator.mediaDevices.getUserMedia = async () => { await ac.resume(); return dst.stream; };
 }
 
-// 자동 재생을 꺼서 테스트 중 스피커로 소리가 나지 않게 한다. init은 페이지 스크립트보다 먼저 돈다.
-export async function openPage(page, init) {
-  await page.addInitScript(() => { try { localStorage.setItem('vp-autoplay', 'false'); } catch (e) {} });
+// Autoplay is turned off so tests make no sound. The UI language is English unless `lang` says otherwise.
+// init runs before the page script.
+export async function openPage(page, init, lang = 'en') {
+  await page.addInitScript(l => { try { localStorage.setItem('vp-autoplay', 'false'); if (!localStorage.getItem('vp-lang')) localStorage.setItem('vp-lang', JSON.stringify(l)); } catch (e) {} }, lang);
   await page.addInitScript(fakeMic);
   if (init) await page.addInitScript(init);
   await page.goto('/voice-practice.html');
-  await expect(page.locator('#storeInfo')).toContainText('녹음');
+  await expect(page.locator('#storeInfo')).toContainText(lang === 'en' ? 'takes' : '녹음');
 }
 
 export async function micOn(page) {
   await page.locator('#micBtn').click();
-  await expect(page.locator('#micBtn')).toHaveText('마이크 끄기');
+  await expect(page.locator('#micBtn')).toHaveText('Turn mic off');
 }
 
-// 목록 위 "녹음 N개"는 메모리의 녹음 수라, 저장 실패한 녹음까지 센다.
+// "N takes" above the list counts takes in memory, including ones that failed to save.
 export async function takeCount(page) {
-  const m = (await page.locator('#storeInfo').textContent()).match(/녹음 (\d+)개/);
+  const m = (await page.locator('#storeInfo').textContent()).match(/(\d+) takes/);
   return m ? +m[1] : 0;
 }
 
@@ -38,7 +39,7 @@ export async function record(page, ms) {
   await page.locator('#recBtn').click();
   await page.waitForTimeout(ms);
   await page.locator('#recBtn').click();
-  await expect(page.locator('#storeInfo')).toContainText(`녹음 ${n + 1}개`);
+  await expect(page.locator('#storeInfo')).toContainText(`${n + 1} takes`);
 }
 
 export function idbIds(page) {
@@ -50,7 +51,7 @@ export function idbIds(page) {
   });
 }
 
-// 가장 최근 녹음의 형식과, 영점 교차로 잰 주파수
+// Format of the newest take, and its frequency measured by zero crossings
 export function newestTake(page) {
   return page.evaluate(async () => {
     const db = await new Promise((res, rej) => { const r = indexedDB.open('voice-practice'); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
@@ -69,7 +70,7 @@ export function newestTake(page) {
   });
 }
 
-// 녹음 데이터를 IndexedDB에 직접 넣는다. age는 며칠 전, 각 100 KB짜리 무음 WAV.
+// Puts takes straight into IndexedDB. age is in days; each is a 100 KB silent WAV.
 export function seedTakes(page, list) {
   return page.evaluate(async list => {
     const pad = n => String(n).padStart(2, '0');
