@@ -1,4 +1,4 @@
-# Voice Practice
+# speak-clear
 
 A single HTML page for practising English speaking voice and pronunciation on your own, plus a Praat script that analyzes recordings.
 The goal is not to sound "like a native speaker" but to be **easy to understand** (comprehensibility).

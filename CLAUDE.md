@@ -1,4 +1,4 @@
-# Voice Practice
+# speak-clear
 
 A personal page for practising English speaking voice and pronunciation, plus a voice analysis tool.
 Started in a claude.ai conversation and moved to Claude Code on 2026-10-17.
